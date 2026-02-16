@@ -23,3 +23,18 @@ socket.on('helloAll', data => {
 socket.on('newCLient', data => {
     console.log(data, 'has joined the chat!') // Log the new client message received from the server
 })
+
+socket.on('MessageFromServerToAllClients', newMessage => {
+    const newMessageElement = document.createElement('li') // Create a new list item element for the message
+    newMessageElement.textContent = newMessage // Set the text content of the new message element to the data received from the server
+    document.getElementById('messages-container').appendChild(newMessageElement) // Append the new message element to the messages container
+})
+
+document.getElementById('messages-form').addEventListener('submit', e => {
+    e.preventDefault() // Prevent the default form submission behavior
+    const newMessage = document.getElementById('user-message').value // Get the value of the message input field
+    document.getElementById('user-message').value = '' // Clear the message input field
+    // This socket is sending an event to the server...
+    socket.emit('messageFromClientToServer', newMessage) // Emit the new message to the server
+
+})
