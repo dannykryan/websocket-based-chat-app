@@ -4,12 +4,17 @@
   "description": "A basic real-time chat app using websickets with socket.io",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
     "url": "www.github.com/dannykryan/websocket-based-chat-app.git"
   },
   "author": "Danny Ryan",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
 }
