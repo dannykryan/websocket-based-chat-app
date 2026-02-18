@@ -11,7 +11,7 @@ import jwt from "jsonwebtoken";
 
 const PORT = process.env.PORT || 3000;
 
-const JWT_SECRET = process.env.JWT_SECRET || "SECRET_KEY";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const expressServer = app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
