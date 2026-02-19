@@ -79,12 +79,21 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
-router.get("/user/:username", async (req, res) => {
+router.get("/user/me", verifyToken, async (req, res) => {
   try {
-    const { username } = req.params;
     const user = await prisma.user.findUnique({
-      where: { username },
-      select: { id: true, username: true },
+      where: { id: req.user.userId },
+      select: { 
+        id: true, 
+        username: true, 
+        email: true,
+        profilePictureUrl: true,
+        bio: true,
+        lastOnline: true,
+        createdAt: true,
+        updatedAt: true,
+        spotifyDisplayName: true,
+      },
     });
 
     if (!user) {
@@ -97,11 +106,12 @@ router.get("/user/:username", async (req, res) => {
   }
 });
 
-router.get("/user/me", verifyToken, async (req, res) => {
+router.get("/user/:username", async (req, res) => {
   try {
+    const { username } = req.params;
     const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      select: { id: true, username: true, email: true },
+      where: { username },
+      select: { id: true, username: true },
     });
 
     if (!user) {
