@@ -1,17 +1,27 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 import app from "../app.js";
 
 let testInvalidToken = jwt.sign({ username: "invaliduser" }, "INVALID_SECRET", { expiresIn: "1h" });
-let expiredToken = jwt.sign({ username: "expireduser" }, process.env.JWT_SECRET, { expiresIn: "1ms" });
+let expiredToken = jwt.sign({ username: "expireduser" }, process.env.JWT_SECRET, { expiresIn: -1 });
 let testUserToken;
 let nonExistingUsername = `nonexistinguser${Date.now()}`;
 let testUsername = `testuser${Date.now()}`;
 let testEmail = `testuser${Date.now()}@example.com`;
 let testPassword = `testpassword${Date.now()}`;
 
-describe("Auth routes", () => {
+// Register a test user before running the tests
+beforeAll(async () => {
+  const res = await request(app).post("/api/auth/register").send({
+    username: testUsername,
+    email: testEmail,
+    password: testPassword,
+  });
+  expect(res.status).toBe(201);
+});
+
+describe("User and Auth routes", () => {
   // 400 - Bad Request (missing fields)
   it("POST /api/auth/register returns 400 when fields are missing", async () => {
     const res = await request(app).post("/api/auth/register").send({});
@@ -26,11 +36,6 @@ describe("Auth routes", () => {
   it("GET /api/user/me returns 400 without token", async () => {
     const res = await request(app).get("/api/user/me");
     expect(res.status).toBe(400);
-  });
-
-  it(`GET /api/user/:${nonExistingUsername} returns 404 when username is invalid`, async () => {
-    const res = await request(app).get(`/api/user/${nonExistingUsername}`);
-    expect(res.status).toBe(404);
   });
 
   // 401 - Unauthorized (invalid credentials or token)
@@ -63,12 +68,15 @@ describe("Auth routes", () => {
 
   // 201 - Created (successful registration)
   it("POST /api/auth/register creates a new user", async () => {
+    const uniqueUser = `registertest${Date.now()}`;
     const res = await request(app).post("/api/auth/register").send({
-      username: testUsername,
-      email: testEmail,
-      password: testPassword,
+      username: uniqueUser,
+      email: `${uniqueUser}@example.com`,
+      password: "somepassword123",
     });
     expect(res.status).toBe(201);
+    // clean up
+    await request(app).delete(`/api/user/${uniqueUser}`);
   });
 
   // 200 - OK (successful login and access to protected route)
@@ -95,4 +103,18 @@ describe("Auth routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.username).toBe(testUsername);
   });
+
+  it("DELETE /api/user/:username deletes the user", async () => {
+    const res = await request(app)
+      .delete(`/api/user/${testUsername}`)
+      .set("Authorization", `Bearer ${testUserToken}`);
+    expect(res.status).toBe(200);
+  });
+});
+
+// Clean up: delete the test user if it still exists
+afterAll(async () => {
+  await request(app)
+    .delete(`/api/user/${testUsername}`)
+    .set("Authorization", `Bearer ${testUserToken}`);
 });

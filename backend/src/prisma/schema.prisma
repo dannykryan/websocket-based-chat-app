@@ -8,8 +8,16 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+  
+enum UserRole {
+  USER
+  ADMIN
+}
 
 model User {
+  // User role
+  role UserRole @default(USER)
+  
   // Public fields
   id                  String   @id @default(uuid())
   username            String   @unique

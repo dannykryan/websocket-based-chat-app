@@ -9,7 +9,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const saltRounds = 10;
 
-// POST /api/auth/register
 router.post("/auth/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -41,7 +40,6 @@ router.post("/auth/register", async (req, res) => {
   }
 });
 
-// POST /api/auth/login
 router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -106,6 +104,18 @@ router.get("/user/me", verifyToken, async (req, res) => {
   }
 });
 
+router.delete("/user/me", verifyToken, async (req, res) => {
+  try {
+    await prisma.user.delete({
+      where: { id: req.user.userId },
+    });
+
+    res.json({ message: "User account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/user/:username", async (req, res) => {
   try {
     const { username } = req.params;
@@ -123,6 +133,19 @@ router.get("/user/:username", async (req, res) => {
     }
 
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/user/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    await prisma.user.delete({
+      where: { username },
+    });
+
+    res.json({ message: "User account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
