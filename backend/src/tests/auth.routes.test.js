@@ -38,14 +38,14 @@ describe("User and Auth routes", () => {
     expect(res.status).toBe(400);
   });
 
-  // 401 - Unauthorized (invalid credentials or token)
   it("POST /api/auth/login returns 401 for invalid credentials", async () => {
     const res = await request(app)
       .post("/api/auth/login")
-      .send({ email: "invalid@example.com", password: "invalidpassword" });
+      .send({ usernameOrEmail: "invalid@example.com", password: "invalidpassword" });
     expect(res.status).toBe(401);
   });
 
+  // 401 - Unauthorized (invalid credentials or token)
   it("GET /api/user/me returns 401 with invalid token", async () => {
     const res = await request(app)
       .get("/api/user/me")
@@ -82,7 +82,7 @@ describe("User and Auth routes", () => {
   // 200 - OK (successful login and access to protected route)
   it("POST /api/auth/login returns a token for valid credentials", async () => {
     const res = await request(app).post("/api/auth/login").send({
-      email: testEmail,
+      usernameOrEmail: testEmail,
       password: testPassword,
     });
     expect(res.status).toBe(200);

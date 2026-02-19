@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import prisma from "./lib/prisma.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -23,7 +24,7 @@ const io = new Server(expressServer, {
   },
 });
 
-io.on("connect", (socket) => {
+io.on("connect", async (socket) => {
   // JWT verification
   const token = socket.handshake.auth.token; // Get the token from the client's handshake auth data
   if (!token) {
@@ -35,6 +36,15 @@ io.on("connect", (socket) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     socket.user = decoded; // Attach user info to socket
+
+    // Mark user as online
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { isOnline: true, lastOnline: new Date() }
+    });
+
+    socket.broadcast.emit("userOnline", { userId: decoded.userId });
+
     console.log(
       `User ${decoded.username} connected with socket ID: ${socket.id}`,
     ); // Log the username and socket ID of the connected user
@@ -53,5 +63,16 @@ io.on("connect", (socket) => {
   socket.on("messageFromClientToServer", (newMessage) => {
     // io.emit('helloAll', newMessage) // Emit the message to all clients
     io.emit("MessageFromServerToAllClients", newMessage); // Log the message received from the client
+  });
+
+  socket.on("disconnect", async () => {
+    if (socket.user) {
+      await prisma.user.update({
+        where: { id: socket.user.userId },
+        data: { isOnline: false, lastOnline: new Date() },
+      });
+      socket.broadcast.emit("userOffline", { userId: socket.user.userId });
+      console.log(`User ${socket.user.username} disconnected`);
+    }
   });
 });

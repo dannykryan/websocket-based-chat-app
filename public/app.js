@@ -18,6 +18,14 @@ function initializeSocket() {
     newMessageElement.textContent = newMessage;
     document.getElementById("messages-container").appendChild(newMessageElement);
   });
+
+    socket.on("userOnline", ({ userId }) => {
+    console.log(`User with ID ${userId} is now online`);
+  });
+
+  socket.on("userOffline", ({ userId }) => {
+    console.log(`User with ID ${userId} is now offline`);
+  });
 }
 
 document.getElementById("show-register").addEventListener("click", () => {
@@ -63,7 +71,7 @@ document.getElementById("register-form").addEventListener("submit", (e) => {
 // Login
 document.getElementById("login-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    const email = document.getElementById("login-email").value;
+    const usernameOrEmail = document.getElementById("login-username-or-email").value;
     const password = document.getElementById("login-password").value;
 
     fetch("/api/auth/login", {
@@ -71,7 +79,7 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ usernameOrEmail, password }),
     })
     .then((response) => response.json())
     .then((data) => {

@@ -42,25 +42,30 @@ router.post("/auth/register", async (req, res) => {
 
 router.post("/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { usernameOrEmail, password } = req.body;
 
-    if (!email || !password) {
+    if (!usernameOrEmail || !password) {
       return res.status(400).json({ error: "All fields required" });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: usernameOrEmail },
+          { username: usernameOrEmail }
+        ]
+       },
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({ error: "Invalid email/username or password" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
     // Compare password with the hashed password stored in the database
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({ error: "Invalid email/username or password" });
     }
 
     // Generate JWT token
