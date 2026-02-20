@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import { useRouter } from "next/navigation";
 
@@ -8,7 +8,14 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { setUser, setToken } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const router = useRouter();
+
+  useEffect(() => {
+    if (token) {
+      router.replace("/chat");
+    }
+  }, [token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

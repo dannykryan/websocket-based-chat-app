@@ -20,7 +20,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
     fetchToken().then(() => {
       if (storedToken) setToken(storedToken);
-      // Fetch user info if needed
     });
   }, []);
 
