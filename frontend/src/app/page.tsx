@@ -1,10 +1,11 @@
-import Login from "./components/login";
+import HomeRedirect from "./components/HomeRedirect";
+
 
 export default function Home() {
   
   return (
     <>
-      <Login />
+      <HomeRedirect />
     </>
   );
 }
