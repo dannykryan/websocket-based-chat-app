@@ -75,7 +75,7 @@ router.post("/auth/login", async (req, res) => {
       { expiresIn: "7d" },
     );
 
-    res.json({ token, username: user.username });
+    res.json({ token, username: user.username, profilePictureUrl: user.profilePictureUrl });
   } catch (error) {
     console.error("Full error:", error);
     res.status(500).json({ error: error.message });

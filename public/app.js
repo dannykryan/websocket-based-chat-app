@@ -83,14 +83,36 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
     })
     .then((response) => response.json())
     .then((data) => {
+        console.log("Login response:", data);
         if (data.token) {
             localStorage.setItem("token", data.token);
             alert("Login successful!");
             initializeSocket(); // ← Connect socket AFTER login
             document.querySelector(".login-container").classList.add("d-none");
             document.querySelector(".chat-container").classList.remove("d-none");
+            document.querySelector(".navbar").classList.remove("d-none");
         } else {
             alert("Login failed: " + data.error);
+        }
+
+        const { username, profilePictureUrl } = data; // from your login response
+
+        const avatarDiv = document.getElementById("user-avatar");
+        avatarDiv.innerHTML = ""; // Clear previous content
+
+        if (profilePictureUrl) {
+        // Show profile picture
+        const img = document.createElement("img");
+        img.src = profilePictureUrl;
+        img.alt = username;
+        img.className = "rounded-circle";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        avatarDiv.appendChild(img);
+        } else {
+        // Show initials or fallback
+        avatarDiv.textContent = username[0].toUpperCase();
         }
     })
     .catch((error) => {
