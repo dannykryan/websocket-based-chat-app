@@ -32,7 +32,7 @@ const Login: React.FC = () => {
       if (res.ok && data.token) {
         localStorage.setItem("token", data.token);
         setToken(data.token);
-        setUser({ 
+        setUser({
           username: data.username,
           profilePictureUrl: data.profilePictureUrl,
         });
@@ -50,13 +50,16 @@ const Login: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow"
+    >
       <h2 className="text-xl font-bold mb-4">Login</h2>
       <input
         type="text"
         placeholder="Username or Email"
         value={usernameOrEmail}
-        onChange={e => setUsernameOrEmail(e.target.value)}
+        onChange={(e) => setUsernameOrEmail(e.target.value)}
         className="w-full mb-3 p-2 border rounded"
         required
       />
@@ -64,15 +67,21 @@ const Login: React.FC = () => {
         type="password"
         placeholder="Password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full mb-3 p-2 border rounded"
         required
       />
       {error && <div className="text-red-500 mb-2">{error}</div>}
-      <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+      >
         Login
       </button>
-      <a href="/register" className="block mt-4 text-center text-blue-600 hover:underline">
+      <a
+        href="/register"
+        className="block mt-4 text-center text-blue-600 hover:underline"
+      >
         Don't have an account? Register here.
       </a>
     </form>

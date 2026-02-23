@@ -30,7 +30,7 @@ const Register: React.FC = () => {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Registration successful! Please log in.")
+        alert("Registration successful! Please log in.");
         router.push("/login");
       } else {
         setError(data.error || "Registration failed");
@@ -45,13 +45,16 @@ const Register: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow"
+    >
       <h2 className="text-xl font-bold mb-4">Register</h2>
       <input
         type="email"
         placeholder="Email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full mb-3 p-2 border rounded"
         required
       />
@@ -59,7 +62,7 @@ const Register: React.FC = () => {
         type="text"
         placeholder="Username"
         value={username}
-        onChange={e => setUsername(e.target.value)}
+        onChange={(e) => setUsername(e.target.value)}
         className="w-full mb-3 p-2 border rounded"
         required
       />
@@ -67,12 +70,15 @@ const Register: React.FC = () => {
         type="password"
         placeholder="Password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full mb-3 p-2 border rounded"
         required
       />
       {error && <div className="text-red-500 mb-2">{error}</div>}
-      <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+      >
         Register
       </button>
     </form>

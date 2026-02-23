@@ -9,7 +9,11 @@ type SocketContextType = {
 
 export const SocketContext = createContext<SocketContextType>({ socket: null });
 
-export default function SocketProvider({ children }: { children: React.ReactNode }) {
+export default function SocketProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const { token } = useContext(AuthContext);
 
@@ -21,8 +25,12 @@ export default function SocketProvider({ children }: { children: React.ReactNode
       newSocket.on("connect", () => console.log("connected"));
       newSocket.on("disconnect", () => console.log("disconnected"));
       newSocket.on("welcomeMessage", (data: string) => console.log(data));
-      newSocket.on("userOnline", ({ userId }: { userId: string }) => console.log(`User ${userId} is online`));
-      newSocket.on("userOffline", ({ userId }: { userId: string }) => console.log(`User ${userId} is offline`));
+      newSocket.on("userOnline", ({ userId }: { userId: string }) =>
+        console.log(`User ${userId} is online`),
+      );
+      newSocket.on("userOffline", ({ userId }: { userId: string }) =>
+        console.log(`User ${userId} is offline`),
+      );
 
       return () => {
         newSocket.disconnect();

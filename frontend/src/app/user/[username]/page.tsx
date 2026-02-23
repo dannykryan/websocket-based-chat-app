@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { User } from "../../types/user";
 import Image from "next/image";
 
-export default function UserProfile({ params }: { params: Promise<{ username: string }> }) {
+export default function UserProfile({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
   const { username } = use(params);
   const [user, setUser] = useState<User | null>(null);
 

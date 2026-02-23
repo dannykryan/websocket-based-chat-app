@@ -9,7 +9,11 @@ export const AuthContext = createContext({
   setToken: (token: string) => {},
 });
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
+export default function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState("");
   const [mounted, setMounted] = useState(false);
