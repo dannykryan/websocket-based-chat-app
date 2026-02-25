@@ -41,26 +41,37 @@ Node.js (v18+)
 PostgreSQL instance
 
 1. Clone & Install
+
 Bash
-git clone https://github.com/dannykryan/syncnet.git
-cd syncnet
+git clone https://github.com/dannykryan/chatApp.git
+cd chatApp
 
 # Install Backend
+
 cd backend/src && npm install
 
 # Install Frontend
+
 cd ../../frontend && npm install
+
 2. Environment Configuration
 Create a .env file in backend/src/:
 
 Code snippet
+
 DATABASE_URL="postgresql://user:password@localhost:5432/yourdb"
+
 JWT_SECRET="your_secure_random_string"
+
 PORT=4000
+
 3. Database Initialization
+
 Bash
 npx prisma migrate dev --name init
+
 4. Run the Application
+
 Backend: npm start (Runs on port 4000)
 
 Frontend: npm run dev (Runs on port 3000)
