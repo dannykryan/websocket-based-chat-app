@@ -33,8 +33,10 @@ const Login: React.FC = () => {
         localStorage.setItem("token", data.token);
         setToken(data.token);
         setUser({
+          id: data.id,
           username: data.username,
           profilePictureUrl: data.profilePictureUrl,
+          createdAt: data.createdAt,
         });
         router.push("/chat");
       } else {

@@ -87,6 +87,36 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
+router.post("/friends/add", verifyToken, async (req, res) => {
+  try {
+    const { friendUsername } = req.body;
+
+    if (!friendUsername) {
+      return res.status(400).json({ error: "Friend username is required" });
+    }
+    // Find the receiver user by username
+    const receiver = await prisma.user.findUnique({
+      where: { username: friendUsername },
+    });
+
+    if (!receiver) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Create a new friend request
+    await prisma.friendRequest.create({
+      data: {
+        senderId: req.user.userId,
+        receiverId: receiver.id,
+        status: "PENDING",
+      },
+    });
+    res.json({ message: "Friend request sent successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post("/auth/logout", verifyToken, async (req, res) => {
   try {
     await prisma.user.update({

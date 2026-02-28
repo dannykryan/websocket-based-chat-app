@@ -2,33 +2,21 @@
 import { useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../AuthProvider";
+import { logoutUser } from "../../utils/auth";
+import Button from "../Button";
 
 const LogoutButton = () => {
   const { setUser, setToken } = useContext(AuthContext);
   const router = useRouter();
 
-  const handleLogout = async () => {
-    // Optionally call backend logout endpoint
-    const token = localStorage.getItem("token");
-    if (token) {
-      await fetch("http://localhost:4000/api/auth/logout", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    }
-    localStorage.removeItem("token");
-    setUser(null);
-    setToken("");
-    router.replace("/login");
+  const handleLogout = () => {
+    logoutUser(setUser, setToken, router);
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="bg-red-600 text-white px-4 py-2 rounded hover:cursor-pointer hover:bg-red-700"
-    >
+    <Button onClick={handleLogout}>
       Logout
-    </button>
+    </Button>
   );
 };
 

@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-800 p-4 flex justify-between items-center">
       <a href="/chat" className="text-white text-lg font-bold">
-        Chat
+        ChatApp
       </a>
       <div className="flex items-center space-x-4">
         <LogoutButton />
