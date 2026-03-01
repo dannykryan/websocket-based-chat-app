@@ -17,11 +17,24 @@ const buttonStyles: ButtonStyles = {
   danger: "bg-red-600 text-white hover:bg-red-700",
 };
 
-const Button = ({ onClick, btnStyle, children }: { onClick: () => void; btnStyle?: keyof ButtonStyles; children: React.ReactNode }) => {
+const Button = ({ 
+  onClick, 
+  btnStyle, 
+  children,
+  disabled,
+  className,
+}: { 
+  onClick?: () => void;
+  btnStyle?: keyof ButtonStyles;
+  children: React.ReactNode;
+  disabled?: boolean;
+  className?: string;
+}) => {
   return (
     <button
       onClick={onClick}
-      className={`button ${buttonStyles[btnStyle || "primary"]} px-4 py-2 rounded hover:cursor-pointer`}
+      disabled={disabled}
+      className={`button ${buttonStyles[btnStyle || "primary"]} px-4 py-2 rounded hover:cursor-pointer ${disabled ? "opacity-50 pointer-events-none" : ""} ${className || ""}`}
     >
       {children || "Click Me"}
     </button>

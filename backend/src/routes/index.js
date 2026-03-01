@@ -177,6 +177,76 @@ router.post("/friends/respond", verifyToken, async (req, res) => {
   }
 });
 
+// Route to check if a user is a friend
+router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
+  try {
+    const { friendUsername } = req.params;
+
+    if (!friendUsername) {
+      return res.status(400).json({ error: "Friend username is required" });
+    }
+
+    const friend = await prisma.user.findUnique({
+      where: { username: friendUsername },
+    });
+
+    if (!friend) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log("Checking friendship status between userId:", req.user.userId, "and friendId:", friend.id);
+
+    const friendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: req.user.userId, receiverId: friend.id },
+          { senderId: friend.id, receiverId: req.user.userId },
+        ],
+      },
+    });
+
+    console.log("Friend request found:", friendRequest);
+
+    if (!friendRequest) {
+      return res.json({ status: "NONE" });
+    }
+
+    res.json({ status: friendRequest.status, senderId: friendRequest.senderId, receiverId: friendRequest.receiverId });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route to remove a friend
+router.delete("/friends/remove", verifyToken, async (req, res) => {
+  try {
+    const { username } = req.body;
+    console.log("Request body:", req.body);
+    if (!username) {
+      return res.status(400).json({ error: "Friend username is required" });
+    }
+
+    const friend = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (!friend) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    await prisma.friendRequest.deleteMany({
+      where: {
+        OR: [
+          { senderId: req.user.userId, receiverId: friend.id },
+          { senderId: friend.id, receiverId: req.user.userId },
+        ],
+      },
+    });
+
+    res.json({ message: "Friend removed successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post("/auth/logout", verifyToken, async (req, res) => {
   try {
     await prisma.user.update({
