@@ -28,8 +28,6 @@ export default function UserProfile({
 
   if (!user) return <p>Loading...</p>;
 
-  console.log("Rendering UserProfile for:", user.username);
-
   return (
     <div className="m-4 text-center flex flex-col items-center">
       <Image
@@ -44,7 +42,7 @@ export default function UserProfile({
       <p className="text-gray-600 mt-2">User Since: {new Date(user.createdAt).toLocaleDateString()}</p>
       <p className="text-gray-600 mt-2">Last online: {user.lastOnline ? new Date(user.lastOnline).toLocaleString() : "N/A"}</p>
       <div className="mt-4">
-        {authUser && authUser.username !== user.username && <ProfileFriendshipBar friendUsername={user.username} />}
+        {authUser && authUser.username !== user.username && <ProfileFriendshipBar friendUsername={user.username} friendId={user.id} />}
       </div>
     </div>
   );

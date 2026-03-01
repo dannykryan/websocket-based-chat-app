@@ -1,4 +1,3 @@
-// object to contain classnames for buttons, to avoid hardcoding them in multiple places
 interface ButtonStyles {
     primary: string;
     outline: string;
@@ -6,6 +5,7 @@ interface ButtonStyles {
     greenOutline: string;
     secondary: string;
     danger: string;
+    decline: string;
 }
 
 const buttonStyles: ButtonStyles = {
@@ -15,6 +15,7 @@ const buttonStyles: ButtonStyles = {
   greenOutline: "bg-transparent border border-green-600 text-green-600 hover:bg-green-600 hover:text-white",
   secondary: "bg-gray-600 text-white hover:bg-gray-700",
   danger: "bg-red-600 text-white hover:bg-red-700",
+  decline: "bg-red-600 text-white hover:bg-red-700",
 };
 
 const Button = ({ 

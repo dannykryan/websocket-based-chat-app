@@ -1,5 +1,8 @@
+import { useContext } from "react";
+import { AuthContext } from "../components/AuthProvider";
+
 // Check backend to see if user is already a friend or has pending request
-const checkFriendStatus = async (friendUsername: string) => {
+const checkFriendStatus = async (friendUsername: string, currentUserId: string) => {
   try {
     const token = localStorage.getItem("token");
     const res = await fetch(
@@ -12,8 +15,7 @@ const checkFriendStatus = async (friendUsername: string) => {
     );
     const data = await res.json();
     if (res.ok) {
-      console.log("Friend status data:", data);
-      const isSender = data.senderId === data.currentUserId; // true if current user sent the request, false if received
+      const isSender = data.senderId === currentUserId; // true if current user sent the request, false if received
       return { status: data.status, isSender }; // "FRIEND", "PENDING", "DECLINED", or "NONE"
     } else {
       console.error(data.error || "Failed to check friend status.");
@@ -54,6 +56,35 @@ const handleAddFriend = async (friendUsername: string) => {
   }
 };
 
+// Send request to backend to accept or decline friend request
+const handleFriendResponse = async (
+  friendUsername: string,
+  accept: boolean,
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch("http://localhost:4000/api/friends/respond", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ friendUsername, accept }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert(accept ? "Friend request accepted!" : "Friend request declined.");
+    } else {
+      alert(data.error || "Failed to respond to friend request.");
+    }
+  } catch (err) {
+    alert(
+      "Network error: " +
+        (err instanceof Error ? err.message : "Unknown error"),
+    );
+  }
+};
+
 // Send request to backend to remove friend
 const handleRemoveFriend = async (friendUsername: string) => {
   try {
@@ -80,4 +111,4 @@ const handleRemoveFriend = async (friendUsername: string) => {
   }
 };
 
-export { handleAddFriend, handleRemoveFriend, checkFriendStatus };
+export { handleAddFriend, handleRemoveFriend, handleFriendResponse, checkFriendStatus };

@@ -1,20 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
 import Button from "../Button";
-import { handleAddFriend, handleRemoveFriend, checkFriendStatus } from "../../utils/friendship";
+import {
+  handleAddFriend,
+  handleRemoveFriend,
+  handleFriendResponse,
+  checkFriendStatus,
+} from "../../utils/friendship";
+import { useContext } from "react";
+import { AuthContext } from "../AuthProvider";
 
 interface ProfileFriendshipBarProps {
   friendUsername: string;
+  friendId?: string;
 }
 
-const ProfileFriendshipBar = ({ friendUsername }: ProfileFriendshipBarProps) => {
-  const [friendCheck, setFriendCheck] = useState<{ status: string; isSender: boolean | null } | null>(null);
+const ProfileFriendshipBar = ({
+  friendUsername,
+  friendId,
+}: ProfileFriendshipBarProps) => {
+  const [friendCheck, setFriendCheck] = useState<{
+    status: string;
+    isSender: boolean | null;
+  } | null>(null);
+  const { user: authUser } = useContext(AuthContext);
 
   useEffect(() => {
-    checkFriendStatus(friendUsername).then(setFriendCheck);
-  }, [friendUsername]);
-
-  console.log("Checked friend status for:", friendUsername, "Result:", friendCheck?.status, "IsSender:", friendCheck?.isSender);
+    if (!authUser) return;
+    checkFriendStatus(friendUsername, authUser.id).then(setFriendCheck);
+  }, [friendUsername, authUser])
 
   if (!friendCheck) return null;
 
@@ -25,20 +39,42 @@ const ProfileFriendshipBar = ({ friendUsername }: ProfileFriendshipBarProps) => 
           Remove Friend
         </Button>
       )}
-      {friendCheck.status === "DECLINED" && <p className="text-red-600">Friend request sent</p>}
       {friendCheck.status === "NONE" && (
-        <Button onClick={() => handleAddFriend(friendUsername)} btnStyle="green">
+        <Button
+          onClick={() => handleAddFriend(friendUsername)}
+          btnStyle="green"
+        >
           Send Friend Request
         </Button>
       )}
       {friendCheck.status === "PENDING" && friendCheck.isSender === true && (
-        <Button btnStyle="green" disabled>Request Sent</Button>
-      )}
-      {friendCheck.status === "PENDING" && friendCheck.isSender === false && (
-        <Button onClick={() => handleAddFriend(friendUsername)} btnStyle="green">
-          Accept Friend Request
+        <Button btnStyle="green" disabled>
+          Request Sent
         </Button>
       )}
+      {friendCheck.status === "PENDING" &&
+        friendCheck.isSender === false &&
+        friendId && (
+          <div className="border-2 border-gray-400 p-4 rounded-lg bg-gray-100">
+            <p className="mb-2 font-bold">
+              {friendUsername} wants to be your friend:
+            </p>
+            <div className="gap-2 flex">
+              <Button
+                onClick={() => handleFriendResponse(friendId, true)}
+                btnStyle="primary"
+              >
+                Accept Friend Request
+              </Button>
+              <Button
+                onClick={() => handleFriendResponse(friendId, false)}
+                btnStyle="decline"
+              >
+                Decline Friend Request
+              </Button>
+            </div>
+          </div>
+        )}
     </>
   );
 };

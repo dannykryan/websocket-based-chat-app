@@ -136,13 +136,13 @@ router.post("/friends/add", verifyToken, async (req, res) => {
 // Additional routes for accepting/rejecting friend requests, removing friends, etc. can be added here
 router.post("/friends/respond", verifyToken, async (req, res) => {
   try {    
-    const { senderId, action } = req.body;
-    if (!senderId || !action) {
+    const { friendUsername, friendRequestResponse } = req.body;
+    if (!friendUsername || friendRequestResponse === undefined) {
       return res.status(400).json({ error: "Sender ID and action are required" });
     }
     const friendRequest = await prisma.friendRequest.findFirst({
       where: {
-        senderId,
+        senderId: friendUsername,
         receiverId: req.user.userId,
         status: FriendRequestStatus.PENDING,
       },
@@ -152,13 +152,13 @@ router.post("/friends/respond", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Friend request not found" });
     }
 
-    if (action === "ACCEPT") {
+    if (friendRequestResponse === true) {
       await prisma.friendRequest.update({
         where: { id: friendRequest.id },
         data: { status: FriendRequestStatus.ACCEPTED },
       });
       res.json({ message: "Friend request accepted" });
-    } else if (action === "REJECT") {
+    } else if (friendRequestResponse === false) {
       console.log("Friend request ID:", friendRequest.id);
       console.log("Status value:", FriendRequestStatus.DECLINED);
       
@@ -177,6 +177,9 @@ router.post("/friends/respond", verifyToken, async (req, res) => {
   }
 });
 
+
+
+
 // Route to check if a user is a friend
 router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
   try {
@@ -194,8 +197,6 @@ router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("Checking friendship status between userId:", req.user.userId, "and friendId:", friend.id);
-
     const friendRequest = await prisma.friendRequest.findFirst({
       where: {
         OR: [
@@ -204,8 +205,6 @@ router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
         ],
       },
     });
-
-    console.log("Friend request found:", friendRequest);
 
     if (!friendRequest) {
       return res.json({ status: "NONE" });
