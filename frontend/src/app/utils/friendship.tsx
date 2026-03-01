@@ -1,6 +1,3 @@
-import { useContext } from "react";
-import { AuthContext } from "../components/AuthProvider";
-
 // Check backend to see if user is already a friend or has pending request
 const checkFriendStatus = async (friendUsername: string, currentUserId: string) => {
   try {
