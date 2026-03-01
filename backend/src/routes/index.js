@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
+import { FriendRequestStatus } from "@prisma/client";
 import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
@@ -94,6 +95,7 @@ router.post("/friends/add", verifyToken, async (req, res) => {
     if (!friendUsername) {
       return res.status(400).json({ error: "Friend username is required" });
     }
+
     // Find the receiver user by username
     const receiver = await prisma.user.findUnique({
       where: { username: friendUsername },
@@ -103,15 +105,73 @@ router.post("/friends/add", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Check if a request already exists in either direction
+    const existingRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: req.user.userId, receiverId: receiver.id },
+          { senderId: receiver.id, receiverId: req.user.userId },
+        ],
+      },
+    });
+
+    if (existingRequest) {
+      return res.status(409).json({ error: "Friend request already exists" });
+    }
+
     // Create a new friend request
     await prisma.friendRequest.create({
       data: {
         senderId: req.user.userId,
         receiverId: receiver.id,
-        status: "PENDING",
+        status: FriendRequestStatus.PENDING,
       },
     });
     res.json({ message: "Friend request sent successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Additional routes for accepting/rejecting friend requests, removing friends, etc. can be added here
+router.post("/friends/respond", verifyToken, async (req, res) => {
+  try {    
+    const { senderId, action } = req.body;
+    if (!senderId || !action) {
+      return res.status(400).json({ error: "Sender ID and action are required" });
+    }
+    const friendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        senderId,
+        receiverId: req.user.userId,
+        status: FriendRequestStatus.PENDING,
+      },
+    });
+
+    if (!friendRequest) {
+      return res.status(404).json({ error: "Friend request not found" });
+    }
+
+    if (action === "ACCEPT") {
+      await prisma.friendRequest.update({
+        where: { id: friendRequest.id },
+        data: { status: FriendRequestStatus.ACCEPTED },
+      });
+      res.json({ message: "Friend request accepted" });
+    } else if (action === "REJECT") {
+      console.log("Friend request ID:", friendRequest.id);
+      console.log("Status value:", FriendRequestStatus.DECLINED);
+      
+      const updated = await prisma.friendRequest.update({
+        where: { id: friendRequest.id },
+        data: { status: FriendRequestStatus.DECLINED },
+      });
+      
+      console.log("Updated record:", updated);
+      res.json({ message: "Friend request declined" });
+    } else {
+      res.status(400).json({ error: "Invalid action" });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
