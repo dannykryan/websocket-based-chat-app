@@ -59,7 +59,7 @@ router.post("/auth/login", async (req, res) => {
       return res
         .status(401)
         .json({ error: "Invalid email/username or password" });
-    } 
+    }
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
@@ -119,14 +119,26 @@ router.post("/friends/add", verifyToken, async (req, res) => {
       return res.status(409).json({ error: "Friend request already exists" });
     }
 
-    // Create a new friend request
-    await prisma.friendRequest.create({
+    const created = await prisma.friendRequest.create({
       data: {
         senderId: req.user.userId,
         receiverId: receiver.id,
         status: FriendRequestStatus.PENDING,
       },
     });
+
+    const io = req.app.get("io");
+    io.to(`user:${req.user.userId}`).emit("friendRequestUpdated", {
+      senderId: created.senderId,
+      receiverId: created.receiverId,
+      status: created.status,
+    });
+    io.to(`user:${receiver.id}`).emit("friendRequestUpdated", {
+      senderId: created.senderId,
+      receiverId: created.receiverId,
+      status: created.status,
+    });
+
     res.json({ message: "Friend request sent successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -136,14 +148,19 @@ router.post("/friends/add", verifyToken, async (req, res) => {
 // Additional routes for accepting/rejecting friend requests, removing friends, etc. can be added here
 router.post("/friends/respond", verifyToken, async (req, res) => {
   console.log("Received friend request response:", req.body);
-  try {    
+
+  try {
     const { senderId, friendRequestResponse } = req.body;
+
     if (!senderId || friendRequestResponse === undefined) {
-      return res.status(400).json({ error: "Sender ID and action are required" });
+      return res
+        .status(400)
+        .json({ error: "Sender ID and action are required" });
     }
+
     const friendRequest = await prisma.friendRequest.findFirst({
       where: {
-        senderId: senderId,
+        senderId,
         receiverId: req.user.userId,
         status: FriendRequestStatus.PENDING,
       },
@@ -153,30 +170,44 @@ router.post("/friends/respond", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Friend request not found" });
     }
 
+    const io = req.app.get("io");
+
     if (friendRequestResponse === true) {
-      await prisma.friendRequest.update({
+      const updated = await prisma.friendRequest.update({
         where: { id: friendRequest.id },
         data: { status: FriendRequestStatus.ACCEPTED },
       });
-      res.json({ message: "Friend request accepted" });
-    } else if (friendRequestResponse === false) {
-      
+
+      io.to(`user:${updated.senderId}`).emit("friendRequestUpdated", updated);
+      io.to(`user:${updated.receiverId}`).emit("friendRequestUpdated", updated);
+
+      return res.json({ message: "Friend request accepted" });
+    }
+
+    if (friendRequestResponse === false) {
       const deleted = await prisma.friendRequest.delete({
         where: { id: friendRequest.id },
       });
-      
-      console.log("Deleted record:", deleted);
-      res.json({ message: "Friend request declined" });
-    } else {
-      res.status(400).json({ error: "Invalid action" });
+
+      io.to(`user:${deleted.senderId}`).emit("friendRequestUpdated", {
+        senderId: deleted.senderId,
+        receiverId: deleted.receiverId,
+        status: "NONE",
+      });
+      io.to(`user:${deleted.receiverId}`).emit("friendRequestUpdated", {
+        senderId: deleted.senderId,
+        receiverId: deleted.receiverId,
+        status: "NONE",
+      });
+
+      return res.json({ message: "Friend request declined" });
     }
+
+    return res.status(400).json({ error: "Invalid action" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
-
-
-
 
 // Route to check if a user is a friend
 router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
@@ -208,7 +239,11 @@ router.get("/friends/status/:friendUsername", verifyToken, async (req, res) => {
       return res.json({ status: "NONE" });
     }
 
-    res.json({ status: friendRequest.status, senderId: friendRequest.senderId, receiverId: friendRequest.receiverId });
+    res.json({
+      status: friendRequest.status,
+      senderId: friendRequest.senderId,
+      receiverId: friendRequest.receiverId,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

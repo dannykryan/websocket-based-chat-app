@@ -24,6 +24,8 @@ const io = new Server(expressServer, {
   },
 });
 
+app.set("io", io);
+
 io.on("connect", async (socket) => {
   // JWT verification
   const token = socket.handshake.auth.token; // Get the token from the client's handshake auth data
@@ -36,6 +38,9 @@ io.on("connect", async (socket) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     socket.user = decoded; // Attach user info to socket
+
+    // join private room for this user
+    socket.join(`user:${decoded.userId}`);
 
     // Mark user as online
     await prisma.user.update({

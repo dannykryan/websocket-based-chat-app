@@ -8,6 +8,7 @@ import {
   checkFriendStatus,
 } from "../../utils/friendship";
 import { AuthContext } from "../AuthProvider";
+import { SocketContext } from "../SocketContext";
 
 interface ProfileFriendshipBarProps {
   friendUsername: string;
@@ -23,12 +24,27 @@ const ProfileFriendshipBar = ({
     isSender: boolean | null;
   } | null>(null);
   const { user: authUser } = useContext(AuthContext);
+  const { socket } = useContext(SocketContext);
 
   const refreshFriendStatus = useCallback(async () => {
     if (!authUser) return;
     const updated = await checkFriendStatus(friendUsername, authUser.id);
     setFriendCheck(updated);
   }, [authUser, friendUsername]);
+
+  useEffect(() => {
+    if (!socket || !authUser) return;
+
+    const onFriendRequestUpdated = () => {
+      // only affected users receive this, so just refresh
+      refreshFriendStatus();
+    };
+
+    socket.on("friendRequestUpdated", onFriendRequestUpdated);
+    return () => {
+      socket.off("friendRequestUpdated", onFriendRequestUpdated);
+    };
+  }, [socket, authUser, refreshFriendStatus]);
 
   useEffect(() => {
     refreshFriendStatus();
