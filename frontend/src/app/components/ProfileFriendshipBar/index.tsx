@@ -34,6 +34,10 @@ const ProfileFriendshipBar = ({
     setFriendCheck(updated);
   }, [authUser, friendUsername]);
 
+    useEffect(() => {
+      setFriendCheck(null);
+    }, [friendUsername]);
+
   useEffect(() => {
     if (!socket || !authUser) return;
 
@@ -51,11 +55,6 @@ const ProfileFriendshipBar = ({
   useEffect(() => {
     refreshFriendStatus();
   }, [refreshFriendStatus]);
-
-  useEffect(() => {
-    if (!authUser) return;
-    checkFriendStatus(friendUsername, authUser.id).then(setFriendCheck);
-  }, [friendUsername, authUser]);
 
   const onSendFriendRequest = async () => {
     await handleAddFriend(friendUsername);
@@ -77,7 +76,6 @@ const ProfileFriendshipBar = ({
   if (!friendCheck) return null;
 
   // TODO: Add error handling and loading states for better UX, currently it just won't show any buttons until the check is done. Also consider using a library like react-query for better data fetching management.
-  // TODO: Add real-time updates using WebSockets so that if the other user accepts/declines the request, the UI updates immediately without needing a refresh. This would involve emitting events from the backend when friend requests are accepted/declined and listening for those events in this component to update the state accordingly.
   // TODO: Add confirmation modals for actions like removing a friend or accepting/declining requests to prevent accidental clicks.
   // TODO: Reduce code duplication by creating a reusable FriendRequestCard component for the pending request UI, since it has similar structure for both sent and received requests.
   return (

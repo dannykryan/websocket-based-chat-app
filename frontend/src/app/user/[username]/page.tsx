@@ -5,6 +5,7 @@ import { User } from "../../types/user";
 import Image from "next/image";
 import ProfileFriendshipBar from "../../components/ProfileFriendshipBar";
 import { AuthContext } from "../../components/AuthProvider";
+import ProfileSkeleton from "../../components/ProfileSkeleton";
 
 export default function UserProfile({
   params,
@@ -14,6 +15,10 @@ export default function UserProfile({
   const { user: authUser } = useContext(AuthContext);
   const { username } = use(params);
   const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUser(null);
+  }, [username]);
 
   useEffect(() => {
     if (!username) return;
@@ -26,7 +31,7 @@ export default function UserProfile({
       .catch((err) => console.error("Fetch failed:", err));
   }, [username]);
 
-  if (!user) return <p>Loading...</p>;
+  if (!user) return <ProfileSkeleton />;
 
   return (
     <div className="m-4 text-center flex flex-col items-center">
