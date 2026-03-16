@@ -1,6 +1,6 @@
 // navbar with just the logout button
 "use client";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import LogoutButton from "../LogoutButton";
 
