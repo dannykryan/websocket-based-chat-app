@@ -27,8 +27,6 @@ model User {
   // Public fields
   id                  String   @id @default(uuid())
   username            String   @unique
-  firstName           String?
-  lastName            String?
   email               String   @unique
   profilePictureUrl   String?
   bio                 String?

@@ -13,15 +13,15 @@ import { SocketContext } from "../SocketContext";
 import { FaUserPlus, FaCheck, FaTimes } from "react-icons/fa";
 import { FaUserXmark } from "react-icons/fa6";
 
-interface ProfileFriendshipBarProps {
+interface UserProfileActionsProps {
   friendUsername: string;
   friendId?: string;
 }
 
-const ProfileFriendshipBar = ({
+const UserProfileActions = ({
   friendUsername,
   friendId,
-}: ProfileFriendshipBarProps) => {
+}: UserProfileActionsProps) => {
   const [friendCheck, setFriendCheck] = useState<{
     status: string;
     isSender: boolean | null;
@@ -174,4 +174,4 @@ const ProfileFriendshipBar = ({
   );
 };
 
-export default ProfileFriendshipBar;
+export default UserProfileActions;

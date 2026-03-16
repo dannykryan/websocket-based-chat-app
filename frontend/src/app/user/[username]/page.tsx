@@ -2,7 +2,8 @@
 import { use, useContext } from "react";
 import { useEffect, useState } from "react";
 import { User } from "../../types/user";
-import ProfileFriendshipBar from "../../components/ProfileFriendshipBar";
+import UserProfileActions from "../../components/UserProfileActions";
+import OwnedProfileActions from "../../components/OwnedProfileActions";
 import { AuthContext } from "../../components/AuthProvider";
 import ProfileSkeleton from "../../components/ProfileSkeleton";
 import Avatar from "../../components/Avatar";
@@ -47,7 +48,11 @@ export default function UserProfile({
       <p className="text-gray-600 mt-2">User Since: {new Date(user.createdAt).toLocaleDateString()}</p>
       <p className="text-gray-600 mt-2">Last online: {user.lastOnline ? new Date(user.lastOnline).toLocaleString() : "N/A"}</p>
       <div className="mt-4">
-        {authUser && authUser.username !== user.username && <ProfileFriendshipBar friendUsername={user.username} friendId={user.id} />}
+        {authUser?.username === user.username ? (
+          <OwnedProfileActions />
+        ) : (
+          <UserProfileActions friendUsername={user.username} friendId={user.id} />
+        )}
       </div>
     </div>
   );
