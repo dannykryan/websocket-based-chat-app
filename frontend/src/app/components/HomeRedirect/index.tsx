@@ -2,7 +2,7 @@
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "../AuthProvider";
-import Login from "../loginForm";
+import Login from "../LoginForm";
 
 export default function HomeRedirect() {
   const { token } = useContext(AuthContext);

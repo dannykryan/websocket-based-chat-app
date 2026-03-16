@@ -2,10 +2,10 @@
 import { use, useContext } from "react";
 import { useEffect, useState } from "react";
 import { User } from "../../types/user";
-import Image from "next/image";
 import ProfileFriendshipBar from "../../components/ProfileFriendshipBar";
 import { AuthContext } from "../../components/AuthProvider";
 import ProfileSkeleton from "../../components/ProfileSkeleton";
+import Avatar from "../../components/Avatar";
 
 export default function UserProfile({
   params,
@@ -35,12 +35,12 @@ export default function UserProfile({
 
   return (
     <div className="m-4 text-center flex flex-col items-center">
-      <Image
+      <Avatar
         src={user.profilePictureUrl || "/default-profile-2.png"}
         alt={`${user.username}'s profile picture`}
-        width={100}
-        height={100}
-        className="rounded-full object-cover mb-4"
+        size="3xl"
+        status={user.isOnline ? "online" : "offline"}
+        showStatus
       />
       <h1 className="text-2xl font-bold mb-2">{user.username}</h1>
       <p className="text-gray-600">{user.bio}</p>

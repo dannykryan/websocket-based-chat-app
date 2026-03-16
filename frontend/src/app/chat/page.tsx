@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState, useContext } from "react";
 import { AuthContext } from "../components/AuthProvider";
 import { SocketContext } from "../components/SocketContext";
-import Image from "next/image";
+import Avatar from "../components/Avatar";
 
 type Message = {
   text: string;
@@ -84,20 +84,12 @@ export default function Chat() {
               href={`/user/${message.username}`}
               className="text-gray-300 hover:text-white"
             >
-              <Image
+              <Avatar
                 src={message.profilePictureUrl || "/default-profile-2.png"}
                 alt={`${message.username}'s profile picture`}
-                width={32}
-                height={32}
-                className="rounded-full object-cover"
-                style={{
-                  width: "32px !important",
-                  height: "32px !important",
-                  minWidth: "32px",
-                  minHeight: "32px",
-                  maxWidth: "32px",
-                  maxHeight: "32px",
-                }}
+                size="md"
+                status={"online"}
+                showStatus
               />
             </a>
             <span className="font-semibold">{message.username}:</span>{" "}

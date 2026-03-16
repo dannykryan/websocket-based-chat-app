@@ -5,6 +5,7 @@ export interface User {
   profilePictureUrl?: string;
   bio?: string;
   lastOnline?: string;
+  isOnline: boolean;
   createdAt: string;
   updatedAt?: string;
   spotifyDisplayName?: string | null;

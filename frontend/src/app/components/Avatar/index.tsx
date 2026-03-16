@@ -1,0 +1,59 @@
+"use client";
+
+const sizeClasses = {
+  sm: "w-6 h-6",
+  md: "w-8 h-8",
+  lg: "w-12 h-12",
+  xl: "w-16 h-16",
+  "2xl": "w-24 h-24",
+  "3xl": "w-32 h-32",
+} as const;
+
+const badgeClasses = {
+  sm: "bottom-0 right-0 w-2 h-2 border",
+  md: "bottom-0 right-0 w-2.5 h-2.5 border",
+  lg: "bottom-0.5 right-0.5 w-3 h-3 border",
+  xl: "bottom-1 right-1 w-3.5 h-3.5 border",
+  "2xl": "bottom-1.5 right-1.5 w-4 h-4 border-2",
+  "3xl": "bottom-2 right-2 w-5 h-5 border-2",
+} as const;
+
+const statusClasses = {
+  online: "bg-green-500",
+  offline: "bg-gray-500",
+} as const;
+
+type AvatarSize = keyof typeof sizeClasses;
+type AvatarStatus = keyof typeof statusClasses;
+
+export default function Avatar({
+  src,
+  alt,
+  size = "md",
+  status,
+  showStatus = false,
+}: {
+  src?: string;
+  alt: string;
+  size?: AvatarSize;
+  status?: AvatarStatus;
+  showStatus?: boolean;
+}) {
+  return (
+    <div className={`relative ${sizeClasses[size]}`}>
+      <img
+        src={src}
+        alt={alt}
+        className={`rounded-full object-cover ${sizeClasses[size]}`}
+      />
+      {showStatus && status && (
+        <span className={`absolute block rounded-full border-white ${badgeClasses[size]} ${statusClasses[status]} group`}>
+          {/* Tooltip */}
+          <span className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10">
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}

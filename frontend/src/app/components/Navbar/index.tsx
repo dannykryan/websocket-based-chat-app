@@ -3,6 +3,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import LogoutButton from "../LogoutButton";
+import Avatar from "../Avatar";
 
 export default function Navbar() {
   const { user } = useContext(AuthContext);
@@ -19,10 +20,12 @@ export default function Navbar() {
               href={`/user/${user.username}`}
               className="text-gray-300 hover:text-white"
             >
-              <img
-                src={user.profilePictureUrl || "/default-profile.png"}
-                alt={`${user.username}'s profile picture`}
-                className="w-8 h-8 rounded-full object-cover"
+              <Avatar
+                src={user.profilePictureUrl}
+                alt={`${user.username} profile picture`}
+                size="md"
+                status="online"
+                showStatus
               />
             </a>
           </>
