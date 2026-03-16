@@ -1,8 +1,30 @@
-// Check backend to see if user is already a friend or has pending request
-const checkFriendStatus = async (friendUsername: string, currentUserId: string) => {
+interface FriendStatusResponse {
+  status: "FRIEND" | "PENDING" | "DECLINED" | "NONE";
+  isSender: boolean | null;     // null = no active request exists
+}
+
+interface CheckFriendStatusResult {
+  status: FriendStatusResponse["status"];
+  isSender: FriendStatusResponse["isSender"];
+}
+
+/**
+ * Checks the friendship status between current user and target username.
+ * 
+ * @throws {Error} if the request fails (network error, unauthorized, server error, invalid json, etc.)
+ */
+const checkFriendStatus = async (
+  friendUsername: string,
+  currentUserId: string,
+): Promise<CheckFriendStatusResult> => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  let res: Response;
   try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(
+    res = await fetch(
       `http://localhost:4000/api/friends/status/${friendUsername}`,
       {
         headers: {
@@ -10,104 +32,84 @@ const checkFriendStatus = async (friendUsername: string, currentUserId: string) 
         },
       },
     );
-    const data = await res.json();
-    if (res.ok) {
-      const isSender = data.senderId === currentUserId; // true if current user sent the request, false if received
-      return { status: data.status, isSender }; // "FRIEND", "PENDING", "DECLINED", or "NONE"
-    } else {
-      console.error(data.error || "Failed to check friend status.");
-      return { status: "NONE", isSender: null };
-    }
   } catch (err) {
-    console.error(
-      "Network error: " +
-        (err instanceof Error ? err.message : "Unknown error"),
+    throw new Error(
+      `Network error while checking friend status: ${
+        err instanceof Error ? err.message : "Unknown error"
+      }`,
     );
-    return { status: "NONE", isSender: null };
   }
-};
 
-// Send friend request to backend
-const handleAddFriend = async (friendUsername: string) => {
+  let data: any;
   try {
-    const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:4000/api/friends/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ friendUsername }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert("Friend request sent!");
-    } else {
-      alert(data.error || "Failed to send friend request.");
-    }
-  } catch (err) {
-    alert(
-      "Network error: " +
-        (err instanceof Error ? err.message : "Unknown error"),
+    data = await res.json();
+  } catch {
+    throw new Error("Invalid JSON response from server");
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      data?.error || `Failed to check friend status (${res.status})`,
     );
   }
+
+  const status = data.status as CheckFriendStatusResult["status"];
+  const isSender = data.senderId === currentUserId;
+
+  return { status, isSender };
 };
 
-// Send request to backend to accept or decline friend request
+const handleAddFriend = async (friendUsername: string): Promise<void> => {
+  const token = localStorage.getItem("token");
+  const res = await fetch("http://localhost:4000/api/friends/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ friendUsername }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to send friend request.");
+};
+
 const handleFriendResponse = async (
   senderId: string,
   friendRequestResponse: boolean,
-) => {
-  console.log(
-    `Responding to friend request from ${senderId}: ${friendRequestResponse ? "Accept" : "Decline"}`
-  );
+): Promise<void> => {
+  const token = localStorage.getItem("token");
+  const res = await fetch("http://localhost:4000/api/friends/respond", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ senderId, friendRequestResponse }),
+  });
 
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:4000/api/friends/respond", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ senderId, friendRequestResponse }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert(friendRequestResponse ? "Friend request accepted!" : "Friend request declined.");
-    } else {
-      alert(data.error || "Failed to respond to friend request.");
-    }
-  } catch (err) {
-    alert("Network error: " + (err instanceof Error ? err.message : "Unknown error"));
-  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to respond to friend request.");
 };
 
-// Send request to backend to remove friend
-const handleRemoveFriend = async (username: string) => {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:4000/api/friends/remove", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ username }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert("Friend removed.");
-    } else {      
-      alert(data.error || "Failed to remove friend.");
-    }
-  } catch (err) {
-    alert(
-      "Network error: " +
-        (err instanceof Error ? err.message : "Unknown error"),
-    );
-  }
+const handleRemoveFriend = async (username: string): Promise<void> => {
+  const token = localStorage.getItem("token");
+  const res = await fetch("http://localhost:4000/api/friends/remove", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ username }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to remove friend.");
 };
 
-export { handleAddFriend, handleRemoveFriend, handleFriendResponse, checkFriendStatus };
+export {
+  handleAddFriend,
+  handleRemoveFriend,
+  handleFriendResponse,
+  checkFriendStatus,
+};
