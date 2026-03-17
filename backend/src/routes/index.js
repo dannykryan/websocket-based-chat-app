@@ -607,4 +607,71 @@ router.get("/rooms/:roomId/messages", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/rooms/:roomId/messages", verifyToken, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { content, replyToId } = req.body;
+
+    if (!content || content.trim() === "") {
+      return res.status(400).json({ error: "Message content is required" });
+    }
+
+    // Check user is a member
+    const member = await prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId, userId: req.user.userId } },
+    });
+
+    if (!member) {
+      return res.status(403).json({ error: "You are not a member of this room" });
+    }
+
+    // If replying, check the parent message exists in the same room
+    if (replyToId) {
+      const parentMessage = await prisma.message.findUnique({
+        where: { id: replyToId },
+      });
+
+      if (!parentMessage || parentMessage.roomId !== roomId) {
+        return res.status(404).json({ error: "Reply target not found in this room" });
+      }
+    }
+
+    const message = await prisma.message.create({
+      data: {
+        roomId,
+        senderId: req.user.userId,
+        content: content.trim(),
+        ...(replyToId && { replyToId }),
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            profilePictureUrl: true,
+          },
+        },
+        replyTo: {
+          include: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Emit the new message to all users in the room via Socket.IO
+    const io = req.app.get("io");
+    io.to(`room:${roomId}`).emit("newMessage", message);
+
+    res.status(201).json(message);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import Avatar from "../Avatar";
 import type { Room } from "../../types/dashboard";
+import { FaPaperPlane } from "react-icons/fa";
 
 interface Message {
   id: string;
@@ -24,9 +25,12 @@ interface MessagesPanelProps {
 export default function MessagesPanel({ room }: MessagesPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
   const { token, user } = useContext(AuthContext);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -54,6 +58,48 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || !room || !token || sending) return;
+
+    setSending(true);
+    try {
+      const res = await fetch(`${API_URL}/rooms/${room.id}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: input.trim() }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send message");
+
+      const newMessage = await res.json();
+      setMessages((prev) => [...prev, newMessage]);
+      setInput("");
+      inputRef.current?.focus();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Send on Enter, new line on Shift+Enter
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Auto-resize textarea as user types
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  };
 
   if (!room) {
     return (
@@ -84,17 +130,26 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
 
     if (date.toDateString() === today.toDateString()) return "Today";
     if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return date.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+    return date.toLocaleDateString([], {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
   };
 
   // Group messages and inject date dividers
-  const messagesWithDividers: Array<{ type: "divider"; label: string } | { type: "message"; message: Message }> = [];
+  const messagesWithDividers: Array<
+    { type: "divider"; label: string } | { type: "message"; message: Message }
+  > = [];
   let lastDate = "";
 
   for (const message of messages) {
     const dateKey = new Date(message.sentAt).toDateString();
     if (dateKey !== lastDate) {
-      messagesWithDividers.push({ type: "divider", label: formatDateDivider(message.sentAt) });
+      messagesWithDividers.push({
+        type: "divider",
+        label: formatDateDivider(message.sentAt),
+      });
       lastDate = dateKey;
     }
     messagesWithDividers.push({ type: "message", message });
@@ -102,7 +157,6 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-
       {/* Room header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-charade shrink-0">
         {room.imageUrl ? (
@@ -131,14 +185,19 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
       >
         {messages.length === 0 && (
           <div className="flex items-center justify-center flex-1">
-            <p className="text-gray-500 text-sm">No messages yet. Say something!</p>
+            <p className="text-gray-500 text-sm">
+              No messages yet. Say something!
+            </p>
           </div>
         )}
 
         {messagesWithDividers.map((item, index) => {
           if (item.type === "divider") {
             return (
-              <div key={`divider-${index}`} className="flex items-center gap-3 my-4">
+              <div
+                key={`divider-${index}`}
+                className="flex items-center gap-3 my-4"
+              >
                 <div className="flex-1 h-px bg-charade" />
                 <span className="text-gray-500 text-xs">{item.label}</span>
                 <div className="flex-1 h-px bg-charade" />
@@ -165,15 +224,23 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
               </div>
 
               {/* Bubble */}
-              <div className={`flex flex-col max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
+              <div
+                className={`flex flex-col max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}
+              >
                 {/* Username + time */}
-                <div className={`flex items-baseline gap-2 mb-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                <div
+                  className={`flex items-baseline gap-2 mb-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+                >
                   <span className="text-xs font-medium text-gray-300">
                     {isOwn ? "You" : message.sender.username}
                   </span>
-                  <span className="text-xs text-gray-500">{formatTime(message.sentAt)}</span>
+                  <span className="text-xs text-gray-500">
+                    {formatTime(message.sentAt)}
+                  </span>
                   {message.editedAt && (
-                    <span className="text-xs text-gray-600 italic">(edited)</span>
+                    <span className="text-xs text-gray-600 italic">
+                      (edited)
+                    </span>
                   )}
                 </div>
 
@@ -181,9 +248,10 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
                 <div
                   className={`
                     px-3 py-2 rounded-2xl text-sm text-gray-100 leading-relaxed wrap-break-word
-                    ${isOwn
-                      ? "bg-purple rounded-tr-sm"
-                      : "bg-charade rounded-tl-sm"
+                    ${
+                      isOwn
+                        ? "bg-purple rounded-tr-sm"
+                        : "bg-charade rounded-tl-sm"
                     }
                   `}
                 >
@@ -197,6 +265,33 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
         {/* Anchor to scroll to */}
         <div ref={bottomRef} />
       </div>
+
+        {/* Message input */}
+      <div className="shrink-0 px-4 py-3 border-t border-charade">
+        <div className="flex items-end gap-2 bg-charade rounded-xl px-3 py-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder={`Message ${room.name ?? "this room"}...`}
+            rows={1}
+            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 resize-none outline-none max-h-32 leading-relaxed py-1"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || sending}
+            className="text-white hover:text-purple disabled:text-gray-600 transition-colors shrink-0 pb-1"
+            title="Send message"
+          >
+            <FaPaperPlane size={24} />
+          </button>
+        </div>
+        <p className="text-gray-600 text-xs mt-1 pl-1">
+          Enter to send · Shift+Enter for new line
+        </p>
+      </div>
+
     </div>
   );
 }
