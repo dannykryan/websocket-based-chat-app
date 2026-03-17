@@ -150,14 +150,14 @@ export default function MessagesPanel({ room }: MessagesPanelProps) {
           return (
             <div
               key={message.id}
-              className={`flex items-end gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+              className={`flex items-end pb-2 gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
             >
               {/* Avatar */}
               <div className="flex-shrink-0 mb-1">
                 <Avatar
                   src={message.sender.profilePictureUrl ?? undefined}
                   alt={message.sender.username}
-                  size="sm"
+                  size="md"
                   userId={message.sender.id}
                 />
               </div>

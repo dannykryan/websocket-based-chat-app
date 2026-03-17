@@ -5,6 +5,7 @@ import DMList from "../components/DMList";
 import RoomPanel from "../components/RoomPanel";
 import { Room } from "../types/dashboard";
 import MessagesPanel from "../components/MessagesPanel";
+import UserPanel from "../components/UserPanel";
 
 export default function Dashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -54,13 +55,13 @@ export default function Dashboard() {
       </div>
 
       {/* Column 3: 6/12 — Messages */}
-      <div className="col-span-6 bg-woodsmoke p-4 overflow-hidden">
+      <div className="col-span-6 bg-woodsmoke overflow-hidden">
         <MessagesPanel room={selectedRoom} />
       </div>
 
       {/* Column 4: 2/12 — Members / info */}
-      <div className="col-span-2 bg-charade p-4">
-        <p className="text-gray-400 text-sm">Members</p>
+      <div className="col-span-2 bg-charade">
+        <UserPanel />
       </div>
     </div>
   );
