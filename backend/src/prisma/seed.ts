@@ -73,7 +73,6 @@ const users = [
 ];
 
 async function main() {
-
   console.log("Cleaning up existing data...");
 
   await prisma.message.deleteMany();
@@ -178,19 +177,19 @@ async function main() {
   });
 
   const xmenGeneralMembers = [
-    cyclopsId,
-    wolverineId,
-    stormId,
-    jeanId,
-    beastId,
-    gambitId,
-    rogueId,
-    icemanId,
-    nightcrawlerId,
+    { userId: cyclopsId, role: "admin" },
+    { userId: wolverineId, role: "member" },
+    { userId: stormId, role: "admin" },
+    { userId: jeanId, role: "admin" },
+    { userId: beastId, role: "member" },
+    { userId: gambitId, role: "member" },
+    { userId: rogueId, role: "member" },
+    { userId: icemanId, role: "member" },
+    { userId: nightcrawlerId, role: "member" },
   ];
-  for (const userId of xmenGeneralMembers) {
+  for (const { userId, role } of xmenGeneralMembers) {
     await prisma.roomMember.create({
-      data: { roomId: xmenGeneral.id, userId },
+      data: { roomId: xmenGeneral.id, userId, role },
     });
   }
 
@@ -270,16 +269,18 @@ async function main() {
   });
 
   const dangerRoomMembers = [
-    cyclopsId,
-    wolverineId,
-    stormId,
-    jeanId,
-    icemanId,
-    nightcrawlerId,
-    beastId,
+    { userId: cyclopsId, role: "admin" },
+    { userId: wolverineId, role: "member" },
+    { userId: stormId, role: "member" },
+    { userId: jeanId, role: "member" },
+    { userId: icemanId, role: "member" },
+    { userId: nightcrawlerId, role: "member" },
+    { userId: beastId, role: "member" },
   ];
-  for (const userId of dangerRoomMembers) {
-    await prisma.roomMember.create({ data: { roomId: dangerRoom.id, userId } });
+  for (const { userId, role } of dangerRoomMembers) {
+    await prisma.roomMember.create({
+      data: { roomId: dangerRoom.id, userId, role },
+    });
   }
 
   const dangerRoomMessages = [
@@ -348,9 +349,15 @@ async function main() {
     },
   });
 
-  const leadershipMembers = [cyclopsId, stormId, jeanId];
-  for (const userId of leadershipMembers) {
-    await prisma.roomMember.create({ data: { roomId: leadership.id, userId } });
+  const leadershipMembers = [
+    { userId: cyclopsId, role: "admin" },
+    { userId: stormId, role: "member" },
+    { userId: jeanId, role: "member" },
+  ];
+  for (const { userId, role } of leadershipMembers) {
+    await prisma.roomMember.create({
+      data: { roomId: leadership.id, userId, role },
+    });
   }
 
   const leadershipMessages = [
@@ -413,9 +420,16 @@ async function main() {
     },
   });
 
-  const reconMembers = [cyclopsId, wolverineId, nightcrawlerId, stormId];
-  for (const userId of reconMembers) {
-    await prisma.roomMember.create({ data: { roomId: reconTeam.id, userId } });
+  const reconMembers = [
+    { userId: cyclopsId, role: "admin" },
+    { userId: wolverineId, role: "member" },
+    { userId: nightcrawlerId, role: "member" },
+    { userId: stormId, role: "member" },
+  ];
+  for (const { userId, role } of reconMembers) {
+    await prisma.roomMember.create({
+      data: { roomId: reconTeam.id, userId, role },
+    });
   }
 
   const reconMessages = [
@@ -474,10 +488,14 @@ async function main() {
     },
   });
 
-  const scienceMembers = [beastId, jeanId, stormId];
-  for (const userId of scienceMembers) {
+  const scienceMembers = [
+    { userId: beastId, role: "admin" },
+    { userId: jeanId, role: "member" },
+    { userId: stormId, role: "member" },
+  ];
+  for (const { userId, role } of scienceMembers) {
     await prisma.roomMember.create({
-      data: { roomId: scienceTeam.id, userId },
+      data: { roomId: scienceTeam.id, userId, role },
     });
   }
 
@@ -742,17 +760,17 @@ async function main() {
   });
 
   const mutantRightsMembers = [
-    magnetoId,
-    cyclopsId,
-    stormId,
-    jeanId,
-    beastId,
-    rogueId,
-    icemanId,
+    { userId: magnetoId, role: "admin" },
+    { userId: cyclopsId, role: "member" },
+    { userId: stormId, role: "member" },
+    { userId: jeanId, role: "member" },
+    { userId: beastId, role: "member" },
+    { userId: rogueId, role: "member" },
+    { userId: icemanId, role: "member" },
   ];
-  for (const userId of mutantRightsMembers) {
+  for (const { userId, role } of mutantRightsMembers) {
     await prisma.roomMember.create({
-      data: { roomId: mutantRights.id, userId },
+      data: { roomId: mutantRights.id, userId, role },
     });
   }
 
