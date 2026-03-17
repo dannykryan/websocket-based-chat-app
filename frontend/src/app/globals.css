@@ -9,3 +9,31 @@
   --color-yellow: #FFC020;
   --color-green: #5E925C;
 }
+
+@layer base {
+  html {
+    overflow: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-charade);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-purple);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-charade) transparent;
+  }
+}

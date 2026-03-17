@@ -4,6 +4,7 @@ import RoomSidebar from "../components/RoomSidebar";
 import DMList from "../components/DMList";
 import RoomPanel from "../components/RoomPanel";
 import { Room } from "../types/dashboard";
+import MessagesPanel from "../components/MessagesPanel";
 
 export default function Dashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -53,30 +54,8 @@ export default function Dashboard() {
       </div>
 
       {/* Column 3: 6/12 — Messages */}
-      <div className="col-span-6 bg-woodsmoke p-4">
-        {selectedRoom ? (
-          <div className="flex items-center gap-3 border-b border-charade pb-4 mb-4">
-            {selectedRoom.imageUrl && (
-              <img
-                src={selectedRoom.imageUrl}
-                alt={selectedRoom.name ?? ""}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            )}
-            <div>
-              <h2 className="text-white font-semibold">{selectedRoom.name}</h2>
-              {selectedRoom.description && (
-                <p className="text-gray-400 text-sm">
-                  {selectedRoom.description}
-                </p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <p className="text-gray-500 text-sm">
-            Select a room to view messages
-          </p>
-        )}
+      <div className="col-span-6 bg-woodsmoke p-4 overflow-hidden">
+        <MessagesPanel room={selectedRoom} />
       </div>
 
       {/* Column 4: 2/12 — Members / info */}
