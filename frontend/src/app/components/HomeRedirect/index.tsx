@@ -9,11 +9,12 @@ export default function HomeRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) {
-      router.replace("/login");
+    if (token) {
+      router.replace("/chat");
     }
-    // If you want to show login here, remove the redirect and just render <Login />
   }, [token, router]);
+
+  if (token) return null;
 
   return <Login />;
 }
