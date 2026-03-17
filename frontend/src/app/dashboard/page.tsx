@@ -1,30 +1,85 @@
 "use client";
-import Navbar from "../components/Navbar";
+import { useState } from "react";
+import RoomSidebar from "../components/RoomSidebar";
+
+interface RoomMember {
+  userId: string;
+  user: {
+    id: string;
+    username: string;
+    profilePictureUrl: string | null;
+    isOnline: boolean;
+  };
+}
+
+interface Room {
+  id: string;
+  name: string | null;
+  type: "PUBLIC_BOARD" | "PRIVATE_GROUP" | "DIRECT_MESSAGE";
+  imageUrl: string | null;
+  description: string | null;
+  isPublic: boolean;
+  members: RoomMember[];
+}
 
 export default function Dashboard() {
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [showingDMs, setShowingDMs] = useState(false);
+
+  const handleSelectRoom = (room: Room) => {
+    setSelectedRoom(room);
+    setShowingDMs(false);
+  };
+
+  const handleSelectDMs = () => {
+    setShowingDMs(true);
+    setSelectedRoom(null);
+  };
+
   return (
     <div className="grid grid-cols-12 h-screen">
-        
-        {/* Column 1: 1/12 */}
-        <div className="col-span-1 bg-woodsmoke border-r p-4">
-          <p className="text-xs text-gray-500">Col 1</p>
-        </div>
 
-        {/* Column 2: 3/12 (quarter) */}
-        <div className="col-span-3 bg-charade border-r p-4">
-          <p className="text-sm text-gray-500">Col 2</p>
-        </div>
-
-        {/* Column 3: 6/12 (half) */}
-        <div className="col-span-6 bg-woodsmoke border-r p-4">
-          <p className="text-sm text-gray-500">Col 3</p>
-        </div>
-
-        {/* Column 4: 2/12 (remainder) */}
-        <div className="col-span-2 bg-charade p-4">
-          <p className="text-sm text-gray-500">Col 4</p>
-        </div>
-
+      {/* Column 1: 1/12 — Room sidebar */}
+      <div className="col-span-1 bg-woodsmoke border-r border-charade">
+        <RoomSidebar
+          selectedRoomId={selectedRoom?.id ?? null}
+          onSelectRoom={handleSelectRoom}
+          onSelectDMs={handleSelectDMs}
+          showingDMs={showingDMs}
+        />
       </div>
+
+      {/* Column 2: 3/12 — DM list or room member list */}
+      <div className="col-span-3 bg-charade border-r border-woodsmoke p-4">
+        <p className="text-gray-400 text-sm">
+          {showingDMs ? "Direct Messages" : selectedRoom ? selectedRoom.name : "Select a room"}
+        </p>
+      </div>
+
+      {/* Column 3: 6/12 — Messages */}
+      <div className="col-span-6 bg-woodsmoke p-4">
+        {selectedRoom ? (
+          <div className="flex items-center gap-3 border-b border-charade pb-4 mb-4">
+            {selectedRoom.imageUrl && (
+              <img src={selectedRoom.imageUrl} alt={selectedRoom.name ?? ""} className="w-10 h-10 rounded-full object-cover" />
+            )}
+            <div>
+              <h2 className="text-white font-semibold">{selectedRoom.name}</h2>
+              {selectedRoom.description && (
+                <p className="text-gray-400 text-sm">{selectedRoom.description}</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">Select a room to view messages</p>
+        )}
+      </div>
+
+      {/* Column 4: 2/12 — Members / info */}
+      <div className="col-span-2 bg-charade p-4">
+        <p className="text-gray-400 text-sm">Members</p>
+      </div>
+
+    </div>
   );
 }

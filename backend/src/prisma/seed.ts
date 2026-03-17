@@ -73,6 +73,16 @@ const users = [
 ];
 
 async function main() {
+
+  console.log("Cleaning up existing data...");
+
+  await prisma.message.deleteMany();
+  await prisma.roomMember.deleteMany();
+  await prisma.room.deleteMany();
+  await prisma.friends.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log("Cleanup complete!");
   console.log("Seeding database...");
 
   const passwordHash = await bcrypt.hash("password123", 10);
@@ -162,7 +172,7 @@ async function main() {
       name: "X-Men General",
       description: "The main channel for all X-Men communication",
       isPublic: true,
-      imageUrl: `${BASE_URL}/RoomAvatars/xmen.jpeg`,
+      imageUrl: `${BASE_URL}/RoomAvatars/xmen.jpg`,
       createdById: cyclopsId,
     },
   });
@@ -254,7 +264,7 @@ async function main() {
       name: "Danger Room Schedule",
       description: "Booking and discussion for Danger Room sessions",
       isPublic: true,
-      imageUrl: `${BASE_URL}/RoomAvatars/danger_room.jpeg`,
+      imageUrl: `${BASE_URL}/RoomAvatars/danger_room.jpg`,
       createdById: cyclopsId,
     },
   });
@@ -333,7 +343,7 @@ async function main() {
       name: "X-Men Leadership",
       description: "Strategic planning for senior X-Men",
       isPublic: false,
-      imageUrl: `${BASE_URL}/RoomAvatars/leadership.jpeg`,
+      imageUrl: `${BASE_URL}/RoomAvatars/leadership.jpg`,
       createdById: cyclopsId,
     },
   });
@@ -398,7 +408,7 @@ async function main() {
       name: "Recon Team Alpha",
       description: "Field reconnaissance coordination",
       isPublic: false,
-      imageUrl: `${BASE_URL}/RoomAvatars/recon.jpeg`,
+      imageUrl: `${BASE_URL}/RoomAvatars/recon.jpg`,
       createdById: cyclopsId,
     },
   });
@@ -726,7 +736,7 @@ async function main() {
       name: "Mutant Rights Discussion",
       description: "Open discussion on mutant rights and coexistence",
       isPublic: true,
-      imageUrl: `${BASE_URL}/RoomAvatars/mutant_rights.jpeg`,
+      imageUrl: `${BASE_URL}/RoomAvatars/mutant_rights.jpg`,
       createdById: magnetoId,
     },
   });

@@ -484,4 +484,127 @@ router.delete("/user/:username", async (req, res) => {
   }
 });
 
+// Get all rooms for the current user
+router.get("/rooms", verifyToken, async (req, res) => {
+  try {
+    const rooms = await prisma.room.findMany({
+      where: {
+        members: {
+          some: { userId: req.user.userId },
+        },
+      },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePictureUrl: true,
+                isOnline: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a single room by ID
+router.get("/rooms/:roomId", verifyToken, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePictureUrl: true,
+                isOnline: true,
+                lastOnline: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Check user is a member
+    const isMember = room.members.some((m) => m.userId === req.user.userId);
+    if (!isMember) {
+      return res.status(403).json({ error: "You are not a member of this room" });
+    }
+
+    res.json(room);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get messages for a room (paginated)
+router.get("/rooms/:roomId/messages", verifyToken, async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { cursor, limit = 50 } = req.query;
+
+    // Check user is a member
+    const member = await prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId, userId: req.user.userId } },
+    });
+
+    if (!member) {
+      return res.status(403).json({ error: "You are not a member of this room" });
+    }
+
+    const messages = await prisma.message.findMany({
+      where: {
+        roomId,
+        isDeleted: false,
+        ...(cursor && { sentAt: { lt: new Date(cursor) } }),
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            profilePictureUrl: true,
+          },
+        },
+        replyTo: {
+          include: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { sentAt: "desc" },
+      take: Number(limit),
+    });
+
+    // Return in ascending order for display
+    res.json(messages.reverse());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
