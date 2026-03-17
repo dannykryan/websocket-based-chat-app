@@ -116,6 +116,7 @@ npm run test
 ## 📈 Future Roadmap
 
 - [ ] Message input with send functionality
+- [ ] Update friend request logic to work with new UI
 - [ ] Load more / pagination for message history
 - [ ] Media sharing via Supabase Storage
 - [ ] Message reactions and replies
