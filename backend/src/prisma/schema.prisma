@@ -14,10 +14,10 @@ enum UserRole {
   ADMIN
 }
 
-enum FriendRequestStatus {
+enum FriendStatus {
   PENDING
-  ACCEPTED
-  DECLINED
+  FRIENDS
+  NONE
 }
 
 model User {
@@ -47,23 +47,21 @@ model User {
   spotifyDisplayName  String?
 
   // Relations
-  posts                    Post[]
-  messages                 Message[]
-  sentFriendRequests       FriendRequest[] @relation("SentRequests")
-  receivedFriendRequests   FriendRequest[] @relation("ReceivedRequests")
+  posts               Post[]
+  messages            Message[]
+  friendsAsFirst      Friends[] @relation("UserAsFirst")
+  friendsAsSecond     Friends[] @relation("UserAsSecond")
 }
 
-model FriendRequest {
-  id         String   @id @default(uuid())
-  senderId   String
-  receiverId String
-  status     FriendRequestStatus @default(PENDING)
-  createdAt  DateTime @default(now())
+model Friends {
+  userId1 String
+  userId2 String
+  status  FriendStatus @default(PENDING)
 
-  sender   User @relation("SentRequests", fields: [senderId], references: [id])
-  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  user1   User @relation("UserAsFirst", fields: [userId1], references: [id], onDelete: Cascade)
+  user2   User @relation("UserAsSecond", fields: [userId2], references: [id], onDelete: Cascade)
 
-  @@unique([senderId, receiverId])
+  @@id([userId1, userId2])
 }
 
 model Post {
