@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import RoomSidebar from "../components/RoomSidebar";
+import DMList from "../components/DMList";
 
 interface RoomMember {
   userId: string;
@@ -25,6 +26,9 @@ interface Room {
 export default function Dashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showingDMs, setShowingDMs] = useState(false);
+  const [rooms, setRooms] = useState<Room[]>([]);
+
+  const dmRooms = rooms.filter((r) => r.type === "DIRECT_MESSAGE");
 
   const handleSelectRoom = (room: Room) => {
     setSelectedRoom(room);
@@ -46,14 +50,19 @@ export default function Dashboard() {
           onSelectRoom={handleSelectRoom}
           onSelectDMs={handleSelectDMs}
           showingDMs={showingDMs}
+          onRoomsLoaded={setRooms}
         />
       </div>
 
       {/* Column 2: 3/12 — DM list or room member list */}
-      <div className="col-span-3 bg-charade border-r border-woodsmoke p-4">
-        <p className="text-gray-400 text-sm">
-          {showingDMs ? "Direct Messages" : selectedRoom ? selectedRoom.name : "Select a room"}
-        </p>
+      <div className="col-span-3 bg-charade border-r border-woodsmoke">
+        {showingDMs && (
+          <DMList
+            rooms={dmRooms}
+            selectedRoomId={selectedRoom?.id ?? null}
+            onSelectRoom={handleSelectRoom}
+          />
+        )}
       </div>
 
       {/* Column 3: 6/12 — Messages */}

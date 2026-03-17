@@ -28,6 +28,7 @@ interface RoomSidebarProps {
   selectedRoomId: string | null;
   onSelectRoom: (room: Room) => void;
   onSelectDMs: () => void;
+  onRoomsLoaded: (rooms: Room[]) => void;
   showingDMs: boolean;
 }
 
@@ -35,6 +36,7 @@ export default function RoomSidebar({
   selectedRoomId,
   onSelectRoom,
   onSelectDMs,
+  onRoomsLoaded,
   showingDMs,
 }: RoomSidebarProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -46,7 +48,10 @@ export default function RoomSidebar({
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => setRooms(data))
+      .then((data) => {
+        setRooms(data);
+        onRoomsLoaded(data);
+      })
       .catch(console.error);
   }, [token]);
 
