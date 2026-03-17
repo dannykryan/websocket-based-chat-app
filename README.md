@@ -1,6 +1,6 @@
 # chatApp | Real-Time Messaging Engine
 
-A full-stack communication platform built to explore event-driven architecture and relational data modeling. This project was developed as part of a #100DaysOfCode sprint to bridge the gap between rapid agency delivery and deep-dive technical architecture.
+A full-stack real-time messaging platform with presence tracking, friend relationships, room-based chat, and JWT authentication. Built with Next.js, Node.js, Socket.IO, Prisma and Supabase.
 
 ## 🚀 The Tech Stack
 
