@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState, useContext } from "react";
+import React, { useRef, useEffect, useState, useContext, memo } from "react";
 import { AuthContext } from "../components/AuthProvider";
 import { SocketContext } from "../components/SocketContext";
 import Avatar from "../components/Avatar";
@@ -8,7 +8,28 @@ type Message = {
   text: string;
   username: string;
   profilePictureUrl: string;
+  userId?: string;
 };
+
+// Memoize individual message so it doesn't re-render on keystroke
+const ChatMessage = memo(({ message }: { message: Message }) => (
+  <li className="px-4 py-2 rounded-lg bg-white shadow-sm flex items-center gap-2">
+    <a
+      href={`/user/${message.username}`}
+      className="text-gray-300 hover:text-white"
+    >
+      <Avatar
+        src={message.profilePictureUrl || "/default-profile-2.png"}
+        alt={`${message.username}'s profile picture`}
+        size="md"
+        showStatus={!!message.userId}
+        userId={message.userId}
+      />
+    </a>
+    <span className="font-semibold">{message.username}:</span> {message.text}
+  </li>
+));
+ChatMessage.displayName = "ChatMessage";
 
 export default function Chat() {
   const [userMessage, setUserMessage] = useState("");
@@ -26,21 +47,14 @@ export default function Chat() {
   ]);
   const { user } = useContext(AuthContext);
   const { socket } = useContext(SocketContext);
-
-  console.log("Current user:", user);
-
   const messagesContainerRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (!socket) return;
-
     const handleIncomingMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
     };
-
     socket.on("chatMessage", handleIncomingMessage);
-
-    // Clean up listener on unmount
     return () => {
       socket.off("chatMessage", handleIncomingMessage);
     };
@@ -53,21 +67,17 @@ export default function Chat() {
     }
   }, [messages]);
 
-  function handleSubmit(e: React.SubmitEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!userMessage.trim() || !socket) return;
-
     socket.emit("chatMessage", {
       text: userMessage,
       username: user?.username || "Unknown User",
       profilePictureUrl: user?.profilePictureUrl || "/default-profile.png",
+      userId: user?.id,
     });
-    setUserMessage(""); // clear input, but don't push to messages here
+    setUserMessage("");
   }
-
-  messages.forEach((msg) => {
-    console.log(`Message from ${msg.username}: ${msg.text}`);
-  });
 
   return (
     <div className="chat-container flex flex-col w-full h-[90vh] max-w-3xl mx-auto p-4">
@@ -76,27 +86,9 @@ export default function Chat() {
         className="flex-1 overflow-y-auto border rounded-lg mb-4 p-4 bg-gray-50 space-y-3"
       >
         {messages.map((message, index) => (
-          <li
-            key={index}
-            className="px-4 py-2 rounded-lg bg-white shadow-sm flex items-center gap-2"
-          >
-            <a
-              href={`/user/${message.username}`}
-              className="text-gray-300 hover:text-white"
-            >
-              <Avatar
-                src={message.profilePictureUrl || "/default-profile-2.png"}
-                alt={`${message.username}'s profile picture`}
-                size="md"
-                showStatus
-              />
-            </a>
-            <span className="font-semibold">{message.username}:</span>{" "}
-            {message.text}
-          </li>
+          <ChatMessage key={index} message={message} />
         ))}
       </ul>
-
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           type="text"

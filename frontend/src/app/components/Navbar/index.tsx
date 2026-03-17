@@ -10,8 +10,8 @@ export default function Navbar() {
 
   console.log("Navbar user:", user?.id, user?.username);
   return (
-    <nav className="bg-gray-800 p-4 flex justify-between items-center">
-      <a href="/chat" className="text-white text-lg font-bold">
+    <nav className="flex justify-between items-center">
+      <a href="/chat" className="text-lg font-bold">
         ChatApp
       </a>
       <div className="flex items-center space-x-4">
@@ -20,7 +20,6 @@ export default function Navbar() {
           <>
             <a
               href={`/user/${user.username}`}
-              className="text-gray-300 hover:text-white"
             >
               <Avatar
                 src={user.profilePictureUrl}

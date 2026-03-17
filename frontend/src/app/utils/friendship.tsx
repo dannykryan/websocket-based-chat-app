@@ -1,5 +1,5 @@
 interface FriendStatusResponse {
-  status: "FRIEND" | "PENDING" | "DECLINED" | "NONE";
+  status: "FRIENDS" | "PENDING" | "NONE";
   isSender: boolean | null;     // null = no active request exists
 }
 
