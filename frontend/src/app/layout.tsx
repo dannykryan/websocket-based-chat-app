@@ -36,6 +36,7 @@ export default function RootLayout({
           <SocketProvider>
             <PresenceProvider>
               <ConfirmProvider>
+                <Navbar />
                 {children}
               </ConfirmProvider>
             </PresenceProvider>

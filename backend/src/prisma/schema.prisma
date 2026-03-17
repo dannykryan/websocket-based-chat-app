@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,6 +15,12 @@ enum FriendStatus {
   PENDING
   FRIENDS
   NONE
+}
+
+enum RoomType {
+  PUBLIC_BOARD
+  PRIVATE_GROUP
+  DIRECT_MESSAGE
 }
 
 model User {
@@ -47,8 +50,9 @@ model User {
   spotifyDisplayName  String?
 
   // Relations
-  posts               Post[]
   messages            Message[]
+  rooms               RoomMember[]     // all rooms this user is in
+  ownedRooms          Room[]           @relation("RoomOwner")
   friendsAsFirst      Friends[] @relation("UserAsFirst")
   friendsAsSecond     Friends[] @relation("UserAsSecond")
 }
@@ -64,18 +68,64 @@ model Friends {
   @@id([userId1, userId2])
 }
 
-model Post {
+model Room {
+  id          String     @id @default(uuid())
+  type        RoomType
+
+  name        String?    // null for DMs, or auto-generated "Chat with @user"
+  description String?
+  imageUrl    String?
+  isPublic    Boolean    @default(false)   // for PUBLIC_BOARD
+
+  createdBy   User?      @relation("RoomOwner", fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime?  @updatedAt
+
+  // Relations
+  members     RoomMember[]
+  messages    Message[]
+
+  @@index([type])
+  @@index([isPublic])
+}
+
+model RoomMember {
   id        String   @id @default(uuid())
-  content   String
-  timestamp DateTime @default(now())
+  roomId    String
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+
+  joinedAt  DateTime @default(now())
+  // Optional: role inside the room
+  role      String?  // "owner", "admin", "member"  (or make enum later)
+
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@index([roomId])
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  content   String
-  timestamp DateTime @default(now())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  id          String    @id @default(uuid())
+  roomId      String
+  senderId    String
+
+  content     String
+  sentAt      DateTime  @default(now())
+  editedAt    DateTime?
+
+  // Optional powerful additions
+  replyToId   String?   // self-reference for threads/replies
+  isDeleted   Boolean   @default(false)
+
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender      User      @relation(fields: [senderId], references: [id])
+  replyTo     Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[] @relation("MessageReplies")
+
+  @@index([roomId, sentAt(sort: Desc)])
+  @@index([senderId])
+  @@index([replyToId])
 }
