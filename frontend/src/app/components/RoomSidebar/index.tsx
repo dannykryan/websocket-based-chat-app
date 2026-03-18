@@ -58,6 +58,7 @@ export default function RoomSidebar({
           onClick={() => onSelectRoom(room)}
           size="lg"
           type="button"
+          unread={room.unreadCount}
         />
       ))}
     </div>

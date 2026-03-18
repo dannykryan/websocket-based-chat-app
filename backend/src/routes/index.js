@@ -211,7 +211,9 @@ router.post("/friends/respond", verifyToken, async (req, res) => {
     const { senderId, friendRequestResponse } = req.body;
 
     if (!senderId || friendRequestResponse === undefined) {
-      return res.status(400).json({ error: "Sender ID and action are required" });
+      return res
+        .status(400)
+        .json({ error: "Sender ID and action are required" });
     }
 
     // Sender is userId1, current user is userId2
@@ -510,7 +512,23 @@ router.get("/rooms", verifyToken, async (req, res) => {
       orderBy: { createdAt: "asc" },
     });
 
-    res.json(rooms);
+    // Attach unread count to each room
+    const roomsWithUnread = await Promise.all(
+      rooms.map(async (room) => {
+        const member = room.members.find((m) => m.userId === req.user.userId);
+        const unreadCount = await prisma.message.count({
+          where: {
+            roomId: room.id,
+            sentAt: { gt: member?.lastReadAt ?? new Date(0) },
+            senderId: { not: req.user.userId },
+            isDeleted: false,
+          },
+        });
+        return { ...room, unreadCount };
+      }),
+    );
+
+    res.json(roomsWithUnread);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -547,7 +565,9 @@ router.get("/rooms/:roomId", verifyToken, async (req, res) => {
     // Check user is a member
     const isMember = room.members.some((m) => m.userId === req.user.userId);
     if (!isMember) {
-      return res.status(403).json({ error: "You are not a member of this room" });
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this room" });
     }
 
     res.json(room);
@@ -568,8 +588,16 @@ router.get("/rooms/:roomId/messages", verifyToken, async (req, res) => {
     });
 
     if (!member) {
-      return res.status(403).json({ error: "You are not a member of this room" });
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this room" });
     }
+
+    // Update lastReadAt when user fetches messages
+    await prisma.roomMember.update({
+      where: { roomId_userId: { roomId, userId: req.user.userId } },
+      data: { lastReadAt: new Date() },
+    });
 
     const messages = await prisma.message.findMany({
       where: {
@@ -622,7 +650,9 @@ router.post("/rooms/:roomId/messages", verifyToken, async (req, res) => {
     });
 
     if (!member) {
-      return res.status(403).json({ error: "You are not a member of this room" });
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this room" });
     }
 
     // If replying, check the parent message exists in the same room
@@ -632,7 +662,9 @@ router.post("/rooms/:roomId/messages", verifyToken, async (req, res) => {
       });
 
       if (!parentMessage || parentMessage.roomId !== roomId) {
-        return res.status(404).json({ error: "Reply target not found in this room" });
+        return res
+          .status(404)
+          .json({ error: "Reply target not found in this room" });
       }
     }
 

@@ -18,21 +18,24 @@ interface RoomAvatarProps {
   onClick?: () => void;
   size?: AvatarSize;
   type: "button" | "avatar";
+  unread?: number;
 }
 
-function RoomAvatar({ label, imageUrl, isSelected, onClick, size = "md", type = "avatar" }: RoomAvatarProps) {
+function RoomAvatar({ label, imageUrl, isSelected, onClick, size = "md", type = "avatar", unread }: RoomAvatarProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+
+  console.log(`Unread: ${unread} for room ${label}`);
 
   const isButton = type === "button";
 
   return (
-    <div className="relative flex items-center">
+    <div className={`relative flex items-center ${sizeClasses[size]}`}>
       <button
         onClick={isButton ? onClick : undefined}
         onMouseEnter={isButton ? () => setShowTooltip(true) : undefined}
         onMouseLeave={isButton ? () => setShowTooltip(false) : undefined}
         className={`
-          ${sizeClasses[size]} rounded-full overflow-hidden shrink-0 transition-all
+          w-full h-full rounded-full overflow-hidden shrink-0 transition-all
           ${isButton && (isSelected
             ? "ring-2 ring-purple ring-offset-2 ring-offset-woodsmoke"
             : "hover:ring-2 hover:ring-gray-500 hover:ring-offset-2 hover:ring-offset-woodsmoke"
@@ -53,6 +56,16 @@ function RoomAvatar({ label, imageUrl, isSelected, onClick, size = "md", type = 
         <div className="fixed z-9999 left-20 bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap pointer-events-none">
           {label}
         </div>
+      )}
+
+      {unread && unread > 0 && (
+        <span
+          className="absolute flex items-center justify-center rounded-full bg-purple left-8 -top-1 min-w-[18px] h-[18px] px-1 text-white text-[12px] font-bold"
+        >
+          <span className="absolute -top-px">
+            {unread > 99 ? "99+" : unread}
+          </span>
+        </span>
       )}
     </div>
   );

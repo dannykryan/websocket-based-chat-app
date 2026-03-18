@@ -17,6 +17,7 @@ export interface Room {
   description: string | null;
   isPublic: boolean;
   members: RoomMember[];
+  unreadCount: number;
 }
 
 export interface RoomSidebarProps {

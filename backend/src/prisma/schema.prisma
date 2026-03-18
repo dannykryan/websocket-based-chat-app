@@ -96,8 +96,8 @@ model RoomMember {
   userId    String
 
   joinedAt  DateTime @default(now())
-  // Optional: role inside the room
-  role      String?  // "owner", "admin", "member"  (or make enum later)
+  role      String?
+  lastReadAt  DateTime?
 
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
