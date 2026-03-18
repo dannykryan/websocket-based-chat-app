@@ -122,7 +122,7 @@ function MemberRow({ member, isCurrentUser, isAdmin }: MemberRowProps) {
       </div>
 
       {isAdmin && (
-        <FaCrown size={10} className="text-yellow ml-auto shrink-0" />
+        <FaCrown size={10} className="text-yellow ml-2 mr-auto shrink-0" />
       )}
     </div>
   );

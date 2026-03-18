@@ -77,9 +77,9 @@ export default function Avatar({
       )}
       {showStatus && resolvedStatus && (
         <span
-          className={`absolute block rounded-full border-white ${badgeClasses[size]} ${statusClasses[resolvedStatus]} group`}
+          className={`absolute block rounded-full border-white ${badgeClasses[size]} ${statusClasses[resolvedStatus]} group/status`}
         >
-          <span className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-10">
+          <span className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 px-2 py-1 text-xs bg-black text-white rounded opacity-0 group-hover/status:opacity-100 pointer-events-none whitespace-nowrap z-10">
             {resolvedStatus.charAt(0).toUpperCase() + resolvedStatus.slice(1)}
           </span>
         </span>
