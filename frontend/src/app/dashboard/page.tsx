@@ -19,6 +19,10 @@ export default function Dashboard() {
     setShowingDMs(false);
   };
 
+  const handleSelectDM = (room: Room ) => {
+    setSelectedRoom(room);
+  }
+
   const handleSelectDMs = () => {
     setShowingDMs(true);
     setSelectedRoom(null);
@@ -43,7 +47,7 @@ export default function Dashboard() {
           <DMList
             rooms={dmRooms}
             selectedRoomId={selectedRoom?.id ?? null}
-            onSelectRoom={handleSelectRoom}
+            onSelectRoom={handleSelectDM}
           />
         ) : selectedRoom ? (
           <RoomPanel room={selectedRoom} />
