@@ -18,8 +18,6 @@ const ButtonRound = ({
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // TODO: Add tooltip component */}
-
   return (
     <div 
       className="relative w-12 h-12"

@@ -4,8 +4,7 @@ import Button from "../Button";
 import AvatarUpload from "../AvatarUpload";
 import { User } from "../../types/user";
 import FormInput from "../FormInput";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useProfileForm } from "../../hooks/useProfileForm";
 
 type EditProfileFormProps = {
   initialValues: {
@@ -18,78 +17,95 @@ type EditProfileFormProps = {
   onSaved: (updatedUser: User) => void;
 };
 
-export default function EditProfileForm({ initialValues, onCancel, onSaved }: EditProfileFormProps) {
-  const [username, setUsername] = useState(initialValues.username);
-  const [email, setEmail] = useState(initialValues.email);
+export default function EditProfileForm({
+  initialValues,
+  onCancel,
+  onSaved,
+}: EditProfileFormProps) {
+  const [username, setUsername] = useState(initialValues.username ?? "");
+  const [email, setEmail] = useState(initialValues.email ?? "");
+  const [password, setPassword] = useState("");
   const [bio, setBio] = useState(initialValues.bio ?? "");
-  const [profilePictureUrl, setProfilePictureUrl] = useState(initialValues.profilePictureUrl ?? "");
-  const [saving, setSaving] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(
+    initialValues.profilePictureUrl ?? "",
+  );
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { handleSubmit, usernameError, emailError, error } =
+    useProfileForm("edit");
 
   const token = localStorage.getItem("token") ?? undefined;
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await fetch(`${API_URL}/user/me`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username, email, bio, profilePictureUrl }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to update profile");
-      onSaved(data);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update profile");
-    } finally {
-      setSaving(false);
+  const handleFormSubmit = async (e: React.SubmitEvent) => {
+    const result = await handleSubmit(e, {
+      email,
+      username,
+      password,
+      bio,
+      profilePictureUrl,
+    });
+    
+    if (result === true) {
+      onSaved({
+        username,
+        email,
+        bio,
+        profilePictureUrl,
+      } as User);
     }
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={handleFormSubmit} className="space-y-5">
       {/* Avatar upload */}
       <AvatarUpload
         value={profilePictureUrl}
         onChange={setProfilePictureUrl}
         token={token}
+        onUploadingChange={setUploadingImage}
       />
 
       {/* Username */}
-      <FormInput
-        label="Username"
-        type="text"
-        value={username}
-        autoComplete="username"
-        onChange={setUsername}
-        required
-      />
+      <div>
+        <FormInput
+          label="Username"
+          type="text"
+          value={username}
+          autoComplete="username"
+          onChange={setUsername}
+          required
+        />
+        {usernameError && (
+          <div className="text-xs text-red-500 mb-0">{usernameError}</div>
+        )}
+      </div>
 
       {/* Email */}
-      <FormInput
-        label="Email"
-        type="email"
-        value={email ?? ""}
-        autoComplete="email"
-        onChange={setEmail}
-        required
-      />
+      <div>
+        <FormInput
+          label="Email"
+          type="email"
+          value={email ?? ""}
+          autoComplete="email"
+          onChange={setEmail}
+          required
+        />
+        {emailError && (
+          <div className="text-xs text-red-500 mb-0">{emailError}</div>
+        )}
+      </div>
 
       {/* Bio */}
-      <FormInput
-        label="Bio"
-        type="text"
-        value={bio}
-        onChange={setBio}
-      />
+      <div>
+        <FormInput label="Bio" type="text" value={bio} onChange={setBio} />
+        {error && <div className="text-xs text-red-500 mb-0">{error}</div>}
+      </div>
 
       <div className="flex gap-2 justify-end pt-2">
-        <Button btnStyle="gray" onClick={onCancel}>Cancel</Button>
-        <Button btnStyle="primary" disabled={saving}>
-          {saving ? "Saving..." : "Save"}
+        <Button btnStyle="gray" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button btnStyle="primary" disabled={uploadingImage}>
+          {uploadingImage ? "Uploading..." : "Save"}
         </Button>
       </div>
     </form>

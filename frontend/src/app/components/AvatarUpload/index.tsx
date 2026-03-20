@@ -1,7 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FaCamera } from "react-icons/fa";
-import FromInput from "../FormInput";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,6 +8,7 @@ interface AvatarUploadProps {
   value: string;
   onChange: (url: string) => void;
   token?: string;
+  onUploadingChange?: (uploading: boolean) => void;
   type?: "register" | "edit";
 }
 
@@ -21,6 +21,7 @@ export default function AvatarUpload({
   value,
   onChange,
   token,
+  onUploadingChange,
   type,
 }: AvatarUploadProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -28,6 +29,10 @@ export default function AvatarUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageClick = () => fileInputRef.current?.click();
+
+  useEffect(() => {
+    if (onUploadingChange) onUploadingChange(uploadingImage);
+  }, [uploadingImage, onUploadingChange]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,7 +91,7 @@ export default function AvatarUpload({
         <Image
           src={
             value ||
-            "https://birclqnuxghihsievxtb.supabase.co/storage/v1/object/public/Images/UserAvatars/chatapp-team.png"
+            "https://birclqnuxghihsievxtb.supabase.co/storage/v1/object/public/Images/UserAvatars/chatapp-logo.png"
           }
           alt="Profile picture"
           fill

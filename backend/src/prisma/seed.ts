@@ -21,7 +21,7 @@ const users = [
     username: "chatapp_team",
     email: "chatapp-team@example.com",
     bio: "Official ChatApp Team",
-    profilePictureUrl: `${BASE_URL}/UserAvatars/chatapp-team.png`,
+    profilePictureUrl: `${BASE_URL}/UserAvatars/chatapp-logo.png`,
     isSystem: true,
   },
   {

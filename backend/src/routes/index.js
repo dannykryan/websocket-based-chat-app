@@ -77,6 +77,23 @@ router.post("/auth/register", async (req, res) => {
       return res.status(400).json({ error: "All fields required" });
     }
 
+    // Check if username exists
+    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    if (existingUsername) {
+      return res.status(409).json({ error: "Username already taken" });
+    }
+
+    // Check if email exists
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      return res.status(409).json({ error: "Email already taken" });
+    }
+
+    // Email format validation (optional, frontend should do this too)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     const user = await prisma.user.create({
