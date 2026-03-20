@@ -16,5 +16,9 @@ export default function HomeRedirect() {
 
   if (token) return null;
 
-  return <Login />;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-charade">
+      <Login />
+    </div>
+  )
 }

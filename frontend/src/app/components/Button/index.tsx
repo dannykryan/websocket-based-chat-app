@@ -32,12 +32,14 @@ const buttonStyles: ButtonStyles = {
 };
 
 const Button = ({
+  type,
   onClick,
   btnStyle,
   children,
   disabled,
   className,
 }: {
+  type?: "button" | "submit" | "reset";
   onClick?: () => void;
   btnStyle?: keyof ButtonStyles;
   children: React.ReactNode;
@@ -46,6 +48,7 @@ const Button = ({
 }) => {
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`button ${buttonStyles[btnStyle || "gray"]} px-4 py-2 rounded hover:cursor-pointer ${disabled ? "opacity-50 pointer-events-none" : ""} ${className || ""}`}

@@ -37,7 +37,7 @@ export default function UserPanel({ username }: UserPanelProps) {
   console.log("Displaying user:", displayUser);
 
   return (
-    <div className="m-4 text-center flex flex-col items-center">
+    <div className="m-4 flex flex-col items-center">
       <Avatar
         src={displayUser.profilePictureUrl || "/default-profile-2.png"}
         alt={`${displayUser.username}'s profile picture`}

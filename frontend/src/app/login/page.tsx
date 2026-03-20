@@ -1,5 +1,9 @@
 import Login from "../components/LoginForm";
 
 export default function LoginPage() {
-  return <Login />;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-charade">
+      <Login />
+    </div>
+  );
 }

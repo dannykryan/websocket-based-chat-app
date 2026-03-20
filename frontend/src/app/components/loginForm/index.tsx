@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import { useRouter } from "next/navigation";
+import Button from "../Button";
 
 const Login: React.FC = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
@@ -58,15 +59,15 @@ const Login: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow"
+      className="bg-woodsmoke border border-gray-700 rounded-xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4"
     >
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <h2 className="text-xl font-bold mb-4 text-white">Login</h2>
       <input
         type="text"
         placeholder="Username or Email"
         value={usernameOrEmail}
         onChange={(e) => setUsernameOrEmail(e.target.value)}
-        className="w-full mb-3 p-2 border rounded"
+        className="w-full mb-3 p-2 border border-gray-700 rounded bg-woodsmoke text-white"
         required
       />
       <input
@@ -74,19 +75,16 @@ const Login: React.FC = () => {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full mb-3 p-2 border rounded"
+        className="w-full mb-3 p-2 border border-gray-700 rounded bg-woodsmoke text-white"
         required
       />
       {error && <div className="text-red-500 mb-2">{error}</div>}
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-      >
+      <Button type="submit" btnStyle="primary" className="w-full">
         Login
-      </button>
+      </Button>
       <a
         href="/register"
-        className="block mt-4 text-center text-blue-600 hover:underline"
+        className="block mt-4 text-center text-purple hover:underline"
       >
         Don't have an account? Register here.
       </a>

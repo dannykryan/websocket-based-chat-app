@@ -2,11 +2,15 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import { useRouter } from "next/navigation";
+import Button from "../Button";
+import AvatarUpload from "../AvatarUpload";
+import FormInput from "../FormInput";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState("");
   const [error, setError] = useState("");
   const { token } = useContext(AuthContext);
   const router = useRouter();
@@ -27,7 +31,7 @@ const Register: React.FC = () => {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify({ email, username, password, profilePictureUrl }),
       });
       const data = await res.json();
 
@@ -49,40 +53,46 @@ const Register: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow"
+      className="bg-woodsmoke border border-gray-700 rounded-xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4"
     >
-      <h2 className="text-xl font-bold mb-4">Register</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full mb-3 p-2 border rounded"
-        required
+      <h2 className="text-xl font-bold mb-4 text-white">Register</h2>
+      <AvatarUpload
+        value={profilePictureUrl}
+        onChange={setProfilePictureUrl}
+        type="register"
       />
-      <input
+      <FormInput
+        label="Username"
         type="text"
-        placeholder="Username"
         value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="w-full mb-3 p-2 border rounded"
+        autoComplete="username"
+        onChange={setUsername}
         required
       />
-      <input
+      <FormInput
+        label="Email"
+        type="email"
+        value={email ?? ""}
+        autoComplete="email"
+        onChange={setEmail}
+        required
+      />
+      <FormInput
+        label="Password"
         type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full mb-3 p-2 border rounded"
+        value={password ?? ""}
+        autoComplete="current-password"
+        onChange={setPassword}
         required
       />
       {error && <div className="text-red-500 mb-2">{error}</div>}
-      <button
+      <Button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        btnStyle="primary"
+        className="w-full"
       >
         Register
-      </button>
+      </Button>
     </form>
   );
 };

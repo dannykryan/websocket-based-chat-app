@@ -26,7 +26,10 @@ export default function EditButton({
   return (
     <div className={`flex items-center justify-center gap-2 ${className}`}>
       <Button onClick={() => setOpen(true)}>
+        <div className="flex items-center gap-1">
+        <FaPencilAlt className="text-sm mr-2" />
         Edit Profile
+        </div>
       </Button>
 
       <EditProfileDialog

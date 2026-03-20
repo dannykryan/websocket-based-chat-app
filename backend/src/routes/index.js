@@ -71,7 +71,7 @@ router.post(
 
 router.post("/auth/register", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, profilePictureUrl } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: "All fields required" });
@@ -84,6 +84,7 @@ router.post("/auth/register", async (req, res) => {
         username,
         email,
         passwordHash,
+        profilePictureUrl,
       },
     });
 
