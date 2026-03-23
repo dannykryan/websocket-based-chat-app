@@ -96,7 +96,7 @@ export default function DMList({
 
                 {/* Unread badge */}
                 {room.unreadCount > 0 && (
-                  <span className="flex items-center justify-center mr-auto rounded-full bg-purple min-w-[18px] h-[18px] px-1 text-white text-[12px] font-bold shrink-0">
+                  <span className="flex items-center justify-center mr-auto rounded-full bg-purple min-w-4.5 h-4.5 px-1 text-white text-[12px] font-bold shrink-0">
                     {room.unreadCount > 99 ? "99+" : room.unreadCount}
                   </span>
                 )}
